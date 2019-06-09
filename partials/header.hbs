@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<header>
+	<div class="bs-component fixed-top">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+	        <div class="container">
+	            <a class="navbar-brand" href="/">UVC Universidad Virtual de Colombia</a>
+	            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+	            	<span class="navbar-toggler-icon"></span>
+	            </button>
+
+	            <div class="collapse navbar-collapse" id="navbarColor01">
+	              <ul class="navbar-nav mr-auto">
+	                <li class="nav-item">
+	                  <a class="nav-link" href="/cursos?rol=coordinador">Cursos Rol Coordinador</span></a>
+	                </li>
+	                <li class="nav-item">
+	                  <a class="nav-link" href="/cursos?rol=interesado">Cursos Rol Interesado</a>
+	                </li>
+	              </ul>
+	              <div class="form-inline">
+	              	<span class="badge badge-secondary">
+	              		<span class="mr-2">{{rol}}</span>
+	              		<img src="img/footerIcon.jpg" alt="{{rol}}" width="24" height="24" title="{{rol}}" style="border-radius:0.5rem;">
+	              	</span>
+        		</div>
+	            </div>
+	        </div>
+          </nav>
+    </div>
+    <div class="jumbotron jumbotron-fluid" style="margin-top: 3em;">
+	  <div class="container">
+	  	<h3 class="display-5">Bienvenidos a la</h3>
+	    <h1 class="display-4">Universidad Virtual de Colombia UVC</h1>
+	    <p class="lead">Especializada en tecnologias de la informacion, las cuales puedes aprender desde cualquier lugar del mundo solo con tener un computador a la mano :)</p>
+	  </div>
+	</div>
+</header>

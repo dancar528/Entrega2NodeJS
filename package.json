@@ -1,0 +1,22 @@
+{
+  "name": "entrega2",
+  "version": "1.0.1",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Daniela <dancar.528@gmail.com> (https://twitter/dcardoh)",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "boostrap": "^2.0.0",
+    "express": "^4.17.1",
+    "hbs": "^4.0.4",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.15.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
