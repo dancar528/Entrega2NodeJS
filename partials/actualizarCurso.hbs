@@ -1,0 +1,12 @@
+<div class="container" style="margin-bottom: 3em;">
+	<form action="/actualizar?rol={{rol}}" method="post" class="form-inline my-2 my-lg-0">
+		<input type="hidden" name="id_curso" value="{{id}}">
+		<legend class="text-muted">Cambiar estado del curso?</legend>
+		<select name="estado" class="form-control mr-sm-2 coll{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'estado' 'is-invalid' 'actualizar'}}{{/if}}" id="estado" value="{{formulario.estado}}">
+			<option value="">Seleccione el nuevo estado...</option>
+			<option value="Disponible">Disponible</option>
+			<option value="Cerrado">Cerrado</option>
+		</select>
+		<button class="btn btn-primary my-2 my-sm-0" name="boton" value="actualizar">Actualizar</button>
+	</form>
+</div>

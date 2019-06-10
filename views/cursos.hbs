@@ -1,62 +1,6 @@
 {{>header}}
-
 {{#if (crearCursos rol)}}
-<div class="container" style="margin-top: 2em;">
-	<form action="/cursos?rol={{rol}}" method="post">
-		<fieldset>
-			<div class="container" style="margin-bottom: 3em;">
-				<legend>Administrar Cursos</legend>
-
-				{{#if (alertaValidarCampos resultado.boton 'crear')}}
-					<div class="row">
-						<div class="bs-component">
-							<div class="alert alert-dismissible alert-{{mostrarAlerta resultado}}">
-								<button type="button" class="close" data-dismiss="alert">×</button>
-								<strong>{{resultado.estado}}!</strong> {{resultado.msg}}
-							</div>
-						</div>
-					</div>
-				{{/if}}
-				<div class="row">
-					<div class="form-group col{{validarCampos resultado formulario 'nombre' 'has-danger' 'crear'}}">
-						<label for="nombre">Nombre</label>
-						<input type="text" class="form-control{{validarCampos resultado formulario 'nombre' 'is-invalid' 'crear'}}" placeholder="Nombre" id="nombre" name="nombre" value="{{formulario.nombre}}">
-					</div>
-					<div class="form-group col{{validarCampos resultado formulario 'id' 'has-danger' 'crear'}}">
-						<label for="id">ID Curso</label>
-						<input type="text" class="form-control{{validarCampos resultado formulario 'id' 'is-invalid' 'crear'}}" placeholder="ID Curso" id="id" name="id" value="{{formulario.id}}">
-					</div>
-				</div>
-				<div class="row">
-					<div class="form-group col{{validarCampos resultado formulario 'descripcion' 'has-danger' 'crear'}}">
-						<label for="descripcion">Descripcion</label>
-						<textarea name="descripcion" class="form-control{{validarCampos resultado formulario 'descripcion' 'is-invalid' 'crear'}}" id="descripcion" rows="3">{{formulario.descripcion}}</textarea>
-					</div>
-					<div class="form-group col {{validarCampos resultado formulario 'valor' 'has-danger' 'crear'}}">
-						<label for="valor">Valor</label>
-						<input type="text" name="valor" class="form-control {{validarCampos resultado formulario 'valor' 'is-invalid' 'crear'}}" id="valor" placeholder="Valor" value="{{formulario.valor}}">
-					</div>
-				</div>
-				<div class="row">
-					<div class="form-group col">
-						<label for="modalidad">Modalidad</label>
-						<select name="modalidad" class="form-control" id="modalidad" value="{{formulario.modalidad}}">
-							<option value="">Seleccionar...</option>
-							<option value="Presencial">Presencial</option>
-							<option value="Virtual">Virtual</option>
-						</select>
-					</div>
-					<div class="form-group col">
-						<label for="intensidad">Intensidad</label>
-						<input type="text" name="intensidad" id="intensidad" class="form-control" placeholder="Intensidad" value="{{formulario.intensidad}}">
-					</div>
-				</div>
-				<button class="btn btn-secondary" name="boton" value="crear">Crear</button>
-				<button class="btn btn-secondary" name="boton" value="limpiarCursos">Limpiar Campos</button>
-			</div>
-		</fieldset>
-	</form>
-</div>
+	{{>formCrearCurso}}
 {{/if}}
 <div class="container">
 	<div class="accordion" id="accordionExample">
@@ -116,54 +60,11 @@
 					</table>
 		        </div>
 		        {{#if (permitirInscribir ../rol)}}
-				<div class="container">
-					<form action="/cursos?rol={{../rol}}" method="post">
-						<input type="hidden" name="id_curso" value="{{id}}">
-						<legend>Reservar Cupo</legend>
-						{{#if (mostrarFormAlInscribir ../resultado.id_curso id)}}
-    						{{#if (alertaValidarCampos ../resultado.boton 'inscribir')}}
-								<div class="row">
-									<div class="bs-component">
-										<div class="alert alert-dismissible alert-{{mostrarAlerta ../resultado}}">
-											<button type="button" class="close" data-dismiss="alert">×</button>
-											<strong>{{../resultado.estado}}!</strong> {{../resultado.msg}}
-										</div>
-									</div>
-								</div>
-							{{/if}}
-						{{/if}}
-						<div class="row">
-							<div class="form-group col{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'doc' 'has-danger' 'inscribir'}}{{/if}}">
-								<label for="doc">Documento de identidad</label>
-								<input type="text" class="form-control{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'doc' 'is-invalid' 'inscribir'}}{{/if}}" placeholder="Documento de identidad" id="doc" name="doc" value="{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{../formulario.doc}}{{/if}}">
-							</div>
-							<div class="form-group col{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'nombre' 'has-danger' 'inscribir'}}{{/if}}">
-								<label for="nombre">Nombre</label>
-								<input type="text" class="form-control{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'nombre' 'is-invalid' 'inscribir'}}{{/if}}" placeholder="Nombre" id="nombre" name="nombre" value="{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{../formulario.nombre}}{{/if}}">
-							</div>
-						</div>
-			        	<div class="row">
-							<div class="form-group col{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'correo' 'has-danger' 'inscribir'}}{{/if}}">
-								<label for="correo">Correo</label>
-								<input type="email" class="form-control{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'correo' 'is-invalid' 'inscribir'}}{{/if}}" placeholder="Correo" id="correo" name="correo" value="{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{../formulario.correo}}{{/if}}">
-							</div>
-							<div class="form-group col{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'telefono' 'has-danger' 'inscribir'}}{{/if}}">
-								<label for="telefono">Telefono</label>
-								<input type="text" class="form-control{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'telefono' 'is-invalid' 'inscribir'}}{{/if}}" placeholder="Telefono" id="telefono" name="telefono" value="{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{../formulario.telefono}}{{/if}}">
-							</div>
-						</div>
-			        	<div class="row">
-							<div class="form-group col">
-			        			<button class="btn btn-primary" name="boton" value="inscribir">Inscribir</button>
-								<button class="btn btn-secondary" name="boton" value="limpiarAspirantes">Limpiar Campos</button>
-			        		</div>
-			        	</div>
-			        </form>
-		        </div>
+					{{>formCrearAspirante rol=../rol resultado=../resultado formulario=../formulario}}
 		        {{/if}}
-		        <div class="container">
-	        		{{#if (mostrarFormAlInscribir ../resultado.id_curso id)}}
-	        			{{#if (alertaValidarCampos ../resultado.boton 'actualizar')}}
+	        	{{#if (mostrarFormAlInscribir ../resultado.id_curso id)}}
+	        		{{#if (alertaValidarCampos ../resultado.boton 'actualizar')}}
+		        		<div class="container">
 			        		<div class="row">
 								<div class="bs-component">
 									<div class="alert alert-dismissible alert-{{mostrarAlerta ../resultado}}">
@@ -172,49 +73,14 @@
 									</div>
 								</div>
 							</div>
-						{{/if}}
+						</div>
 					{{/if}}
-				</div>
+				{{/if}}
 		        {{#if (listarAspirantesXCurso ../rol)}}
-			        <div class="container" style="margin-bottom: 3em;">
-			        	<form action="/actualizar?rol={{../rol}}" method="post" class="form-inline my-2 my-lg-0">
-							<input type="hidden" name="id_curso" value="{{id}}">
-							<legend class="text-muted">Cambiar estado del curso?</legend>
-							<select name="estado" class="form-control mr-sm-2 coll{{#if (mostrarFormAlInscribir ../formulario.id_curso id)}}{{validarCampos ../resultado ../formulario 'estado' 'is-invalid' 'actualizar'}}{{/if}}" id="estado" value="{{formulario.estado}}">
-								<option value="">Seleccione el nuevo estado...</option>
-								<option value="Disponible">Disponible</option>
-								<option value="Cerrado">Cerrado</option>
-							</select>
-							<button class="btn btn-primary my-2 my-sm-0" name="boton" value="actualizar">Actualizar</button>
-			        	</form>
-		        	</div>
+			        {{>actualizarCurso rol=../rol resultado=../resultado formulario=../formulario}}
 		        	{{#if (mostrarAspirantesXCurso id)}}
-			        	<div class="container">
-			        		<table class="table table-hover">
-			        			<thead>
-			        				<th scope="col">Documento de Identidad</th>
-			        				<th scope="col">Nombre</th>
-			        				<th scope="col">Correo</th>
-			        				<th scope="col">Telefono</th>
-			        				<th scope="col"></th>
-			        			</thead>
-			        			<tbody>
-			        				{{#each (mostrarAspirantesXCurso id)}}
-				        				<tr>
-	        								<form action="/eliminar?rol={{../../rol}}" method="post">
-												<input type="hidden" name="id_curso" value="{{../id}}">
-												<input type="hidden" name="docAspirante" value="{{doc}}">
-					        					<td>{{doc}}</td>
-					        					<td>{{nombre}}</td>
-					        					<td>{{correo}}</td>
-					        					<td>{{telefono}}</td>
-					        					<td><button type="submit" class="btn btn-primary" name="boton" value="eliminar">Eliminar</button></td>
-				        					</form>
-				        				</tr>
-			        				{{/each}}
-			        			</tbody>
-			        		</table>
-			        	</div>
+			        	{{>listarAspirantesCurso rol=../rol id=id}}
+		        		
 		        	{{/if}}
 		        {{/if}}
 		      </div>
@@ -223,5 +89,4 @@
 		{{/each}}
 	</div>
 </div>
-
 {{>footer}}

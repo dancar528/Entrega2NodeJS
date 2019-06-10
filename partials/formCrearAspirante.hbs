@@ -1,0 +1,44 @@
+<div class="container">
+	<form action="/inscribir?rol={{rol}}" method="post">
+		<input type="hidden" name="id_curso" value="{{id}}">
+		<legend>Reservar Cupo</legend>
+		{{#if (mostrarFormAlInscribir resultado.id_curso id)}}
+			{{#if (alertaValidarCampos resultado.boton 'inscribir')}}
+				<div class="row">
+					<div class="bs-component">
+						<div class="alert alert-dismissible alert-{{mostrarAlerta resultado}}">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>{{resultado.estado}}!</strong> {{resultado.msg}}
+						</div>
+					</div>
+				</div>
+			{{/if}}
+		{{/if}}
+		<div class="row">
+			<div class="form-group col{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'doc' 'has-danger' 'inscribir'}}{{/if}}">
+				<label for="doc">Documento de identidad</label>
+				<input type="text" class="form-control{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'doc' 'is-invalid' 'inscribir'}}{{/if}}" placeholder="Documento de identidad" id="doc" name="doc" value="{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{formulario.doc}}{{/if}}">
+			</div>
+			<div class="form-group col{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'nombre' 'has-danger' 'inscribir'}}{{/if}}">
+				<label for="nombre">Nombre</label>
+				<input type="text" class="form-control{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'nombre' 'is-invalid' 'inscribir'}}{{/if}}" placeholder="Nombre" id="nombre" name="nombre" value="{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{formulario.nombre}}{{/if}}">
+			</div>
+		</div>
+    	<div class="row">
+			<div class="form-group col{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'correo' 'has-danger' 'inscribir'}}{{/if}}">
+				<label for="correo">Correo</label>
+				<input type="email" class="form-control{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'correo' 'is-invalid' 'inscribir'}}{{/if}}" placeholder="Correo" id="correo" name="correo" value="{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{formulario.correo}}{{/if}}">
+			</div>
+			<div class="form-group col{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'telefono' 'has-danger' 'inscribir'}}{{/if}}">
+				<label for="telefono">Telefono</label>
+				<input type="text" class="form-control{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'telefono' 'is-invalid' 'inscribir'}}{{/if}}" placeholder="Telefono" id="telefono" name="telefono" value="{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{formulario.telefono}}{{/if}}">
+			</div>
+		</div>
+    	<div class="row">
+			<div class="form-group col">
+    			<button class="btn btn-primary" name="boton" value="inscribir">Inscribir</button>
+				<button class="btn btn-secondary" name="boton" value="limpiarAspirantes">Limpiar Campos</button>
+    		</div>
+    	</div>
+    </form>
+</div>

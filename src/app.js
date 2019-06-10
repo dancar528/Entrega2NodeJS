@@ -57,14 +57,10 @@ app.post('/actualizar', (req, res) => {
 	});
 });
 
-app.post('/cursos', (req, res) => {
+app.post('/crear', (req, res) => {
 
 	let resultado = [];
-	if (req.body.boton === 'crear') {
-		resultado = crearCurso(req.body);
-	} else if (req.body.boton === 'inscribir') {
-		resultado = crearAspirante(req.body, req.body.id_curso);
-	} else if (req.body.boton === 'limpiarCursos') {
+	if (req.body.boton === 'limpiarCursos') {
 		req.body.nombre = '';
 		req.body.id = '';
 		req.body.descripcion = '';
@@ -72,11 +68,8 @@ app.post('/cursos', (req, res) => {
 		req.body.modalidad = '';
 		req.body.intensidad = '';
 		req.body.estado = '';
-	} else if (req.body.boton === 'limpiarAspirantes') {
-		req.body.nombre = '';
-		req.body.doc = '';
-		req.body.telefono = '';
-		req.body.correo = '';
+	} else if (req.body.boton === 'crear') {
+		resultado = crearCurso(req.body);
 	}
 
 	res.render('cursos', {
@@ -84,8 +77,37 @@ app.post('/cursos', (req, res) => {
 		resultado: resultado,
 		formulario: req.body
 	});
+});
+
+app.post('/inscribir', (req, res) => {
+
+	let resultado = [];
+	if (req.body.boton === 'limpiarAspirantes') {
+		req.body.nombre = '';
+		req.body.doc = '';
+		req.body.telefono = '';
+		req.body.correo = '';
+		resultado.id_curso = req.body.id_curso;
+	} else if (req.body.boton === 'inscribir') {
+		resultado = crearAspirante(req.body, req.body.id_curso);
+	}
+
+	res.render('cursos', {
+		rol: req.query.rol,
+		resultado: resultado,
+		formulario: req.body
+	});
+});
+
+app.post('/cursos', (req, res) => {
+
+	res.render('cursos', {
+		rol: req.query.rol,
+		formulario: req.body
+	});
 
 });
+
 app.listen(3000, () => 
 	console.log('Servidor escuchando en el puerto 3000')
 );
