@@ -4,7 +4,7 @@
 {{/if}}
 <div class="container">
 	<div class="accordion" id="accordionExample">
-		{{#each (mostrarCursos rol)}}
+		{{#each (mostrarCursos rol formulario.doc formulario.action)}}
 			<div class="card">
 		    <div class="card-header" id="heading{{@index}}">
 			    <h4 class="mb-0">
@@ -60,7 +60,7 @@
 					</table>
 		        </div>
 		        {{#if (permitirInscribir ../rol)}}
-					{{>formCrearAspirante rol=../rol resultado=../resultado formulario=../formulario}}
+					{{>formCrearAspiranteCurso rol=../rol resultado=../resultado formulario=../formulario}}
 		        {{/if}}
 	        	{{#if (mostrarFormAlInscribir ../resultado.id_curso id)}}
 	        		{{#if (alertaValidarCampos ../resultado.boton 'actualizar')}}
@@ -80,7 +80,6 @@
 			        {{>actualizarCurso rol=../rol resultado=../resultado formulario=../formulario}}
 		        	{{#if (mostrarAspirantesXCurso id)}}
 			        	{{>listarAspirantesCurso rol=../rol id=id}}
-		        		
 		        	{{/if}}
 		        {{/if}}
 		      </div>

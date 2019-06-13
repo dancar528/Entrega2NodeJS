@@ -15,6 +15,11 @@ const listarAspirantes = () => {
 	return aspirantes;
 };
 
+const listarUsuarios = () => {
+	let usuarios = require('./usuarios.json');
+	return usuarios;
+};
+
 const mostrarCursosAspirantes = () => {
 	let cursos = listarCursos();
 	let aspirantesCursos = cargarAspirantesCursos();
@@ -93,7 +98,7 @@ const crearCurso = (nuevoCurso) => {
 	}
 };
 
-const crearAspirante = (nuevoAspirante, id_curso) => {
+const crearAspirante = (nuevoAspirante) => {
 
 	let resultado = [];
 	let camposObligatorios = [];
@@ -110,67 +115,99 @@ const crearAspirante = (nuevoAspirante, id_curso) => {
 	if (!nuevoAspirante.telefono) {
 		camposObligatorios.push('telefono');
 	}
+	if (!nuevoAspirante.password) {
+		camposObligatorios.push('password');
+	}
 
 	if (camposObligatorios.length > 0) {
 		resultado['camposObligatorios'] = camposObligatorios;
 		resultado['estado'] = 'error';
-		resultado['boton'] = 'inscribir';
-		resultado['id_curso'] = id_curso;
+		resultado['boton'] = nuevoAspirante.boton;
+		resultado['rol'] = 'interesado';
 		resultado['msg'] = 'Favor completar los campos obligatorios';
 		return resultado;
 	}
 
 	let aspirantes = listarAspirantes();
-	let cursosAspirantes = cargarAspirantesCursos();
 	let aspirante = aspirantes.find(aspirante => aspirante.doc == nuevoAspirante.doc);
-	let aspiranteCurso = [];
 
 	if (aspirante) {
-		aspiranteCurso = cursosAspirantes.find(cursoAspirante => {
-			return cursoAspirante.doc_aspirante === nuevoAspirante.doc 
-				&& cursoAspirante.id_curso === id_curso
-		});
-
-		if (aspiranteCurso) {
-			// Aspirante ya esta inscrito en el curso
-			resultado['estado'] = 'error';
-			resultado['boton'] = 'inscribir';
-			resultado['id_curso'] = id_curso;
-			resultado['msg'] = `El aspirante con documento ${aspiranteCurso.doc_aspirante} 
-				ya se encuentra matriculado en el curso con codigo ${aspiranteCurso.id_curso}`;
-			return resultado;
-		} else {
-			aspiranteCurso = {
-				doc_aspirante: nuevoAspirante.doc,
-				id_curso: id_curso
-			};
-			cursosAspirantes.push(aspiranteCurso);
-			guardarAspirantesCursos(cursosAspirantes);
-			resultado['estado'] = 'ok';
-			resultado['boton'] = 'inscribir';
-			resultado['id_curso'] = id_curso;
-			resultado['msg'] = `El aspirante con documento ${nuevoAspirante.doc} se ha 
-				matriculado con exito en el curso con codigo ${id_curso}`;
-			return resultado;
-		}
+		resultado['estado'] = 'error';
+		resultado['boton'] = nuevoAspirante.boton;
+		resultado['rol'] = 'interesado';
+		resultado['msg'] = `Ya existe un usuario con el documento ${nuevoAspirante.doc}`;
+		return resultado;
 	} else {
-		aspiranteCurso = {
-			doc_aspirante: nuevoAspirante.doc,
-			id_curso: id_curso
+		let defaultRol = 'aspirante';
+		let usuario = {
+			doc: nuevoAspirante.doc,
+			password: nuevoAspirante.password,
+			rol: defaultRol
 		};
+		resultado['boton'] = nuevoAspirante.boton;
+		resultado['rol'] = defaultRol;
 		delete nuevoAspirante.boton;
-		delete nuevoAspirante.id_curso;
+		delete nuevoAspirante.password;
 		aspirantes.push(nuevoAspirante);
 		guardarAspirantes(aspirantes);
-		cursosAspirantes.push(aspiranteCurso);
-		guardarAspirantesCursos(cursosAspirantes);
+		let usuarios = listarUsuarios();
+		usuarios.push(usuario);
+		guardarUsuarios(usuarios);
 		resultado['estado'] = 'ok';
-		resultado['boton'] = 'inscribir';
-		resultado['id_curso'] = id_curso;
-		resultado['msg'] = `El aspirante con documento ${aspiranteCurso.doc_aspirante} se ha 
-			matriculado con exito en el curso con codigo ${aspiranteCurso.id_curso}`;
+		resultado['msg'] = `Usuario registrado correctamente!. Recuerda ingresar con el documento`;
 		return resultado;
 	}
+};
+
+const crearAspiranteCurso = (nuevoAspiranteCurso) => {
+
+	let resultado = [];
+	let camposObligatorios = [];
+
+	if (!nuevoAspiranteCurso.doc_aspirante) {
+		camposObligatorios.push('doc_aspirante');
+	} 
+	if (!nuevoAspiranteCurso.id_curso) {
+		camposObligatorios.push('id_curso');
+	}
+
+	if (camposObligatorios.length > 0) {
+		resultado['camposObligatorios'] = camposObligatorios;
+		resultado['estado'] = 'error';
+		resultado['action'] = nuevoAspiranteCurso.action;
+		resultado['id_curso'] = nuevoAspiranteCurso.id_curso;
+		resultado['doc_aspirante'] = nuevoAspiranteCurso.doc_aspirante;
+		resultado['boton'] = nuevoAspiranteCurso.boton;
+		resultado['msg'] = 'Favor completar los campos obligatorios';
+		return resultado;
+	}
+
+	let cursosAspirantes = cargarAspirantesCursos();
+	let cursoAspirante = cursosAspirantes.find(
+		(cursoAspirante) => cursoAspirante.doc_aspirante === nuevoAspiranteCurso.doc_aspirante
+			&& cursoAspirante.id_curso === nuevoAspiranteCurso.id_curso
+	);
+	if (cursoAspirante) {
+		resultado['estado'] = 'error';
+		resultado['id_curso'] = cursoAspirante.id_curso;
+		resultado['action'] = nuevoAspiranteCurso.action;
+		resultado['doc_aspirante'] = nuevoAspiranteCurso.doc_aspirante;
+		resultado['boton'] = nuevoAspiranteCurso.boton;
+		resultado['msg'] = `Usted ya se encuentra matriculado en el curso con codigo ${cursoAspirante.id_curso}`;
+		return resultado;
+	}
+	resultado['action'] = nuevoAspiranteCurso.action;
+	resultado['boton'] = nuevoAspiranteCurso.boton;
+	delete nuevoAspiranteCurso.action;
+	delete nuevoAspiranteCurso.boton;
+
+	cursosAspirantes.push(nuevoAspiranteCurso);
+	guardarAspirantesCursos(cursosAspirantes);
+	resultado['estado'] = 'ok';
+	resultado['doc_aspirante'] = nuevoAspiranteCurso.doc_aspirante;
+	resultado['id_curso'] = nuevoAspiranteCurso.id_curso;
+	resultado['msg'] = `Inscripcion exitosa en el curso ${nuevoAspiranteCurso.id_curso}`;
+	return resultado;
 };
 
 const actualizarEstadoCurso = (idCurso, nuevoEstado) => {
@@ -223,7 +260,7 @@ const actualizarCurso = (cursoAModificar) => {
 		camposObligatorios.push('id');
 	}
 
-	if (camposObligatorios) {
+	if (camposObligatorios.length > 0) {
 		resultado['camposObligatorios'] = camposObligatorios;
 		resultado['estado'] = 'error';
 		resultado['msg'] = 'Favor completar los campos obligatorios';
@@ -282,6 +319,15 @@ const guardarAspirantes = (aspirantes) => {
 
 };
 
+const guardarUsuarios = (usuarios) => {
+	let datos = JSON.stringify(usuarios);
+	fs.writeFile('src/usuarios.json', datos, (err) => {
+		if (err) throw (err);
+		//console.log('Se ha creado el archivo');
+	});
+
+};
+
 const guardarAspirantesCursos = (aspirantesCursos) => {
 	let datos = JSON.stringify(aspirantesCursos);
 	fs.writeFile('src/aspirantes_cursos.json', datos, (err) => {
@@ -291,17 +337,48 @@ const guardarAspirantesCursos = (aspirantesCursos) => {
 
 };
 
-const mostrarCursos = (rol) => {
+const mostrarUsuarios = () => {
+
+	let aspirantes = listarAspirantes();
+	let usuarios = listarUsuarios();
+
+	aspirantes.forEach((aspirante, indice) => {
+		let usuario = usuarios.find((usuario) => usuario.doc === aspirante.doc);
+
+		if (usuario) {
+			aspirantes[indice].rol = usuario.rol;
+
+		}
+	});
+
+	return aspirantes;
+};
+
+const mostrarCursos = (rol, doc, action) => {
 	let cursos = listarCursos();
 
 	// filtrar cursos a mostrar por rol, el rol corrdinador puede
 	// ver todos los cursos incluso en estado cerrado
-	if (rol === 'interesado') {
+	if (!rol || action === 'cursos_disponibles') {
 		cursos = cursos.filter(
 			curso => curso.estado == 'Disponible'
 		);
-	}
-
+	} else if (rol === 'aspirante') {
+		let nuevoCursos = [];
+		let aspirantesCursos = cargarAspirantesCursos();
+		let aspiranteCursos = aspirantesCursos.filter(
+			aspiranteCurso => aspiranteCurso.doc_aspirante === doc
+		);
+		aspiranteCursos.forEach((aspiranteCurso, indice) => {
+			let curso = cursos.find(
+				curso => curso.id === aspiranteCurso.id_curso
+			);
+			if (curso) {
+				nuevoCursos.push(curso);
+			}
+		});
+		cursos = nuevoCursos;
+	} 
 	return cursos;
 };
 
@@ -335,11 +412,109 @@ const eliminarAspiranteCurso = (docAspirante, idCurso) => {
 	}
 };
 
+const actualizarUsuario = (nuevosDatos) => {
+
+	let resultado = [];
+	let camposObligatorios = [];
+	if (!nuevosDatos.doc) {
+		camposObligatorios.push('doc');
+	} 
+	if (!nuevosDatos.nombre) {
+		camposObligatorios.push('nombre');
+	}
+	if (!nuevosDatos.correo) {
+		camposObligatorios.push('correo');
+	}
+	if (!nuevosDatos.telefono) {
+		camposObligatorios.push('telefono');
+	}
+	if (!nuevosDatos.rol) {
+		camposObligatorios.push('rol');
+	}
+	if (camposObligatorios.length > 0) {
+		resultado['camposObligatorios'] = camposObligatorios;
+		resultado['estado'] = 'error';
+		resultado['boton'] = nuevosDatos.boton;
+		resultado['doc_trigger'] = nuevosDatos.doc_trigger;
+		resultado['msg'] = 'Favor completar los campos obligatorios';
+		return resultado;
+	}
+
+	let usuarios = listarUsuarios();	
+	let usuarioIndice = usuarios.findIndex(usuario => usuario.doc === nuevosDatos.doc);
+	let aspirantes = listarAspirantes();
+	let aspiranteIndice = aspirantes.findIndex(aspirante => aspirante.doc === nuevosDatos.doc);
+
+	if (usuarioIndice >= 0) {
+
+		if (usuarios[usuarioIndice].rol !== nuevosDatos.rol) {
+			usuarios[usuarioIndice].rol = nuevosDatos.rol;
+			guardarUsuarios(usuarios);
+		}
+	}
+	if (aspiranteIndice >= 0) {
+		let nuevoAspirante = nuevosDatos;
+		resultado['boton'] = nuevosDatos.boton;
+		resultado['doc_trigger'] = nuevosDatos.doc_trigger;
+		resultado['rol'] = nuevoAspirante.rol;
+
+		delete nuevoAspirante.rol;
+		delete nuevoAspirante.boton;
+		delete nuevoAspirante.doc_trigger;
+
+		aspirantes[aspiranteIndice] = nuevoAspirante;
+		guardarAspirantes(aspirantes);
+
+		resultado['estado'] = 'ok';
+		//resultado['rol'] = 'interesado';
+		resultado['msg'] = 'Usuario actualizado correctamente!';
+		return resultado;
+	}
+};
+
+const ingresar = (usuarioAValidar) => {
+	let resultado = [];
+	let camposObligatorios = [];
+
+	if (!usuarioAValidar.doc) {
+		camposObligatorios.push('doc');
+	}
+	if (!usuarioAValidar.password) {
+		camposObligatorios.push('password');
+	}
+	if (camposObligatorios.length > 0) {
+		resultado['camposObligatorios'] = camposObligatorios;
+		resultado['estado'] = 'error';
+		resultado['msg'] = 'Favor completar los campos obligatorios';
+		return resultado;
+	}
+
+	let usuarios = listarUsuarios();
+	let usuario = usuarios.find(usuario => 
+		usuario.doc == usuarioAValidar.doc && usuario.password === usuarioAValidar.password
+	);
+
+	if (!usuario) {
+		resultado['estado'] = 'error';
+		resultado['rol'] = '';
+		resultado['msg'] = 'No existe usuario con la información ingresada';
+		return resultado;
+	}
+	resultado['estado'] = 'ok';
+	resultado['rol'] = usuario.rol;
+	resultado['msg'] = 'ok';
+	return resultado;
+};
+
 module.exports = {
 	mostrarCursos: mostrarCursos,
 	crearCurso: crearCurso,
 	crearAspirante: crearAspirante,
 	mostrarAspirantesXCurso: mostrarAspirantesXCurso,
 	eliminarAspiranteCurso: eliminarAspiranteCurso,
-	actualizarEstadoCurso: actualizarEstadoCurso
+	actualizarEstadoCurso: actualizarEstadoCurso,
+	ingresar: ingresar,
+	crearAspiranteCurso: crearAspiranteCurso,
+	mostrarUsuarios: mostrarUsuarios,
+	actualizarUsuario: actualizarUsuario
 };

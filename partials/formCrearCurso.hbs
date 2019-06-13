@@ -3,7 +3,6 @@
 		<fieldset>
 			<div class="container" style="margin-bottom: 3em;">
 				<legend>Administrar Cursos</legend>
-
 				{{#if (alertaValidarCampos resultado.boton 'crear')}}
 					<div class="row">
 						<div class="bs-component">
@@ -48,7 +47,7 @@
 						<input type="text" name="intensidad" id="intensidad" class="form-control" placeholder="Intensidad" value="{{formulario.intensidad}}">
 					</div>
 				</div>
-				<button class="btn btn-secondary" name="boton" value="crear">Crear</button>
+				<button class="btn btn-primary" name="boton" value="crear">Crear</button>
 				<button class="btn btn-secondary" name="boton" value="limpiarCursos">Limpiar Campos</button>
 			</div>
 		</fieldset>

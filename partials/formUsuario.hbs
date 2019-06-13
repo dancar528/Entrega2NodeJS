@@ -1,0 +1,67 @@
+<div class="container">
+	<form action="/{{action}}" method="post">
+		<input type="hidden" name="doc_trigger" value="{{doc}}">
+		<legend>Registrarme</legend>
+		{{#if (alertaValidarCampos resultado.boton boton)}}
+			{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}
+				<div class="row">
+					<div class="bs-component">
+						<div class="alert alert-dismissible alert-{{mostrarAlerta resultado}}">
+							<button type="button" class="close" data-dismiss="alert">×</button>
+							<strong>{{resultado.estado}}!</strong> {{resultado.msg}}
+						</div>
+					</div>
+				</div>
+			{{/if}}
+		{{/if}}
+		<div class="row">
+			<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'doc' 'has-danger' boton}}{{/if}}">
+				<label for="doc">Documento de identidad</label>
+				<input type="text" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'doc' 'is-invalid' boton}}{{/if}}" placeholder="Documento de identidad" id="doc" name="doc" value="{{formulario.doc}}">
+			</div>
+			<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'nombre' 'has-danger' boton}}{{/if}}">
+				<label for="nombre">Nombre</label>
+				<input type="text" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'nombre' 'is-invalid' boton}}{{/if}}" placeholder="Nombre" id="nombre" name="nombre" value="{{formulario.nombre}}">
+			</div>
+		</div>
+    	<div class="row">
+			<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'correo' 'has-danger' boton}}{{/if}}">
+				<label for="correo">Correo</label>
+				<input type="email" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'correo' 'is-invalid' boton}}{{/if}}" placeholder="Correo" id="correo" name="correo" value="{{formulario.correo}}">
+			</div>
+			<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'telefono' 'has-danger' boton}}{{/if}}">
+				<label for="telefono">Telefono</label>
+				<input type="text" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'telefono' 'is-invalid' boton}}{{/if}}" placeholder="Telefono" id="telefono" name="telefono" value="{{formulario.telefono}}">
+			</div>
+		</div>
+		<div class="row">
+			{{#if (mostrarPorRol rol 'coordinador')}}
+				<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'rol' 'has-danger' boton}}{{/if}}">
+					<label for="rol">Rol</label>
+					<select name="rol" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'rol' 'is-invalid' boton}}{{/if}}" id="rol" value="{{formulario.rol}}">
+						<option value="">Seleccionar...</option>
+						<option value="coordinador">Coordinador</option>
+						<option value="aspirante">Aspirante</option>
+						<option value="docente">Docente</option>
+					</select>
+				</div>
+			{{/if}}
+			{{#if (mostrarPorRol rol 'interesado' 'aspirante')}}
+				<div class="form-group col{{validarCampos resultado formulario 'password' 'has-danger' boton}}">
+					<label for="password">Contraseña</label>
+					<input type="password" class="form-control{{validarCampos resultado formulario 'password' 'is-invalid' boton}}" placeholder="Contraseña" id="password" name="password" value="{{formulario.password}}">
+				</div>
+			{{/if}}
+			<div class="col">
+			</div>
+		</div>
+    	<div class="row">
+			<div class="form-group col">
+    			<button class="btn btn-primary" name="boton" value="{{boton}}">{{boton}}</button>
+				{{#if (mostrarPorRol rol 'interesado' 'aspirante')}}
+    				<a class="btn btn-link" href="/">Entrar</a>
+    			{{/if}}
+    		</div>
+    	</div>
+    </form>
+</div>

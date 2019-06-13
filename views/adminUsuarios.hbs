@@ -1,0 +1,43 @@
+{{>header}}
+<div class="container">
+	<div class="accordion" id="accordionExample">
+		{{#each (mostrarUsuarios rol)}}
+			<div class="card">
+			    <div class="card-header" id="heading{{@index}}">
+				    <h4 class="mb-0">
+				      	{{nombre}}
+				        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse{{@index}}" aria-expanded="true" aria-controls="collapse{{@index}}">
+				        	<small class="text-muted">Editar</small>
+				        </button>
+				    </h4>
+				    <table class="table table-bordered table-sm">
+						<thead class="thead-dark">
+							<tr>
+								<th scope="col">Nombre</th>
+								<th scope="col">Documento</th>
+								<th scope="col">Correo</th>
+								<th scope="col">Telefono</th>
+								<th scope="col">Rol</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td scope="col">{{nombre}}</td>
+								<td scope="col">{{doc}}</td>
+								<td scope="col">{{correo}}</td>						
+								<td scope="col">{{telefono}}</td>						
+								<td scope="col">{{rol}}</td>						
+							</tr>
+						</tbody>
+					</table>
+			    </div>
+			    <div id="collapse{{@index}}" class="collapse {{mostrarFormAlInscribir ../resultado.doc_trigger doc}}" aria-labelledby="heading{{@index}}" data-parent="#accordionExample">
+			      	<div class="card-body">
+			      		{{>formUsuario action=(append 'usuarios?rol=' ../rol) formulario=this boton='actualizar' resultado=../resultado doc=doc rol=../rol}}
+			    	</div>
+			    </div>
+			</div>
+		{{/each}}
+	</div>
+</div>
+{{>footer}}
