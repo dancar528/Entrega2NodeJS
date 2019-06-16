@@ -14,6 +14,9 @@ const {
 	actualizarUsuario
 } = require('./funciones');
 
+var resultado=null;
+var formulario=null;
+
 const directorioPublico = path.join(__dirname, '../public');
 const directorioPartials = path.join(__dirname, '../partials');
 app.use(express.static(directorioPublico));
@@ -23,56 +26,126 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.set('view engine', 'hbs');
 
 app.get('/', (req, res) => {
-	res.render('index', {});
+	if (resultado!=null && resultado.estado === 'ok') {
+		res.render('cursos', {
+			rol: resultado.rol,
+			resultado: resultado,
+			formulario: formulario,
+			action:'cursos_disponibles',
+			loggeado: (resultado!=null && resultado.estado === 'ok')
+		});
+	}else{
+		res.render('index', {
+			rol: '',
+			loggeado: (resultado!=null && resultado.estado === 'ok')
+		});
+	}
+	
 });
 
 app.post('/', (req, res) => {
 
-	let resultado = ingresar(req.body);
+	resultado = ingresar(req.body);
+	formulario = req.body;
 
 	if (resultado.estado === 'ok') {
 		res.render('cursos', {
 			rol: resultado.rol,
 			resultado: resultado,
-			formulario: req.body
+			formulario: req.body,
+			action:'cursosinscritos',
+			loggeado: (resultado!=null && resultado.estado === 'ok')
 		});
 	} else {
 		res.render('index', {
 			rol: resultado.rol,
 			resultado: resultado,
-			formulario: req.body
+			formulario: req.body,
+			loggeado: (resultado!=null && resultado.estado === 'ok')
 		});
 	}
 });
 
 app.get('/cursos', (req, res) => {
 
-	res.render('cursos', {
-		rol: req.query.rol,
-		formulario: req.query
-	});
+	if (resultado!=null && resultado.rol=='coordinador') {
+		res.render('cursos', {
+			rol: resultado==null ? '' : resultado.rol,
+			resultado: resultado,
+			formulario: req.query,
+			cursosInscritos: req.query.action,
+			action:req.query.action,
+			loggeado: (resultado!=null && resultado.estado === 'ok')
+		});
+	}
+
+	if (req.query.action=='cursos_disponibles') {
+		res.render('cursos', {
+			rol: resultado==null ? '' : resultado.rol,
+			resultado: resultado,
+			formulario: req.query,
+			cursosInscritos: req.query.action,
+			action:req.query.action,
+			loggeado: (resultado!=null && resultado.estado === 'ok')
+		});
+	}else{
+		if (req.query.action=='cursosinscritos'){
+			if(resultado!=null && resultado.estado === 'ok'){
+				res.render('cursos', {
+					rol: resultado==null ? '' : resultado.rol,
+					resultado: resultado,
+					formulario: req.query,
+					cursosInscritos: req.query.action,
+					action:req.query.action,
+					loggeado: (resultado!=null && resultado.estado === 'ok')
+				});
+			}else{
+				res.render('index', {
+					rol: '',
+					loggeado: (resultado!=null && resultado.estado === 'ok')
+				});
+			}
+		}
+		
+	}
+	
 });
 
 app.post('/cursos', (req, res) => {
 
 	res.render('cursos', {
 		rol: req.query.rol,
-		formulario: req.body
+		formulario: req.body,
+		action:req.query.action,
 	});
 
 });
 
+//Eliminamos el alumno del curso
 app.post('/eliminar', (req, res) => {
 
-	let resultado = [];
-	if (req.body.boton === 'eliminar') {
-		resultado = eliminarAspiranteCurso(req.body.docAspirante, req.body.id_curso);
+	let result = [];
+
+	if (req.body.boton == 'remover') {
+		result = eliminarAspiranteCurso(req.body.doc_aspirante, req.body.id_curso);
 	}
 
+	if (req.query.action) {
+		req.body.action = req.query.action;
+	}
+	if (result.doc_aspirante) {
+		req.body.doc = result.doc_aspirante;
+	}
+
+	console.log(result);
+
 	res.render('cursos', {
-		rol: req.query.rol,
-		resultado: resultado,
-		formulario: req.body
+		rol: resultado.rol,
+		resultado: result,
+		formulario: req.query,
+		cursosInscritos: req.query.action,
+		action:req.query.action,
+		loggeado: (resultado!=null && resultado.estado === 'ok')
 	});
 });
 
@@ -85,7 +158,8 @@ app.post('/actualizar', (req, res) => {
 	res.render('cursos', {
 		rol: req.query.rol,
 		resultado: resultado,
-		formulario: req.body
+		formulario: req.body,
+		action:req.query.action
 	});
 });
 
@@ -127,10 +201,17 @@ app.post('/registro', (req, res) => {
 });
 
 app.get('/usuarios', (req, res) => {
-
-	res.render('adminUsuarios', {
-		rol: req.query.rol
-	});
+	if (resultado!=null && resultado.estado === 'ok') {
+		res.render('adminUsuarios', {
+			rol: req.query.rol,
+			loggeado: (resultado!=null && resultado.estado === 'ok')
+		});
+	}else{
+		res.render('index', {
+			rol: '',
+			loggeado: (resultado!=null && resultado.estado === 'ok')
+		});
+	}
 });
 
 app.post('/usuarios', (req, res) => {
@@ -163,14 +244,27 @@ app.post('/inscribirAspCurso', (req, res) => {
 	res.render('cursos', {
 		rol: req.query.rol,
 		resultado: resultado,
-		formulario: req.body
+		formulario: req.body,
+		action: 'cursos_disponibles',
+		loggeado: (resultado!=null && resultado.estado === 'ok')
 	});
 });
 
 app.get('/registro', (req, res) => {
 	res.render('formCrearUsuario', {
-		rol: req.query.rol
+		rol: req.query.rol,
+		loggeado: (resultado!=null && resultado.estado === 'ok')
 	});
+});
+
+app.get('/salir', (req, res) => {
+	resultado = null;
+	formulario=null;
+	res.render('index', {
+		rol: '',
+		loggeado: (resultado!=null && resultado.estado === 'ok')
+	});
+	
 });
 
 app.listen(3000, () => 

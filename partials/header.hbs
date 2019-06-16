@@ -25,9 +25,9 @@
 	                <li class="nav-item">
 	                  <a class="nav-link" href="/cursos?rol={{rol}}&doc={{formulario.doc}}&action=cursos_disponibles">{{doc}}Cursos Disponibles</a>       	         
 	                </li>
-	                {{#if (permitirInscribir rol)}}
+	                {{#if (permitirInscribirRol rol)}}
 		                <li class="nav-item">
-		                  <a class="nav-link" href="/cursos?rol=aspirante&doc={{formulario.doc}}">Mis Cursos</a>
+		                  <a class="nav-link" href="/cursos?rol=aspirante&doc={{formulario.doc}}&action=cursosinscritos">Mis Cursos</a>
 		                </li>
 	                {{/if}}
 	                {{#if (crearCursos rol)}}
@@ -37,10 +37,23 @@
 	                {{/if}}
 	              </ul>
 	              <div class="form-inline">
-	              	<span class="badge badge-secondary">
-	              		<span class="mr-2">{{rol}}</span>
-	              		<img src="img/footerIcon.jpg" alt="{{rol}}" width="24" height="24" title="{{rol}}" style="border-radius:0.5rem;">
-	              	</span>
+					<div class="dropdown">
+						{{#ifeq rol ""}}
+							<span class="badge badge-secondary dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<span class="mr-2">Aún no se ha autenticado</span>
+								<img src="img/footerIcon.jpg" alt="{{rol}}" width="24" height="24" title="{{rol}}" style="border-radius:0.5rem;">
+							</span>
+						{{/ifeq}}
+						{{#ifnoteq rol ""}} 
+							<span class="badge badge-secondary dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<span class="mr-2">{{rol}}</span>
+								<img src="img/footerIcon.jpg" alt="{{rol}}" width="24" height="24" title="{{rol}}" style="border-radius:0.5rem;">
+							</span>
+							<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+								<a class="dropdown-item" href="/salir">Cerrar sesión</a>
+							</div>
+						{{/ifnoteq}}
+					</div>
         		</div>
 	            </div>
 	        </div>

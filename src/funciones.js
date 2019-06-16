@@ -1,8 +1,16 @@
 const fs = require('fs');
 
 const cargarAspirantesCursos = () => {
-	let aspirantesCursos = require('./aspirantes_cursos.json');
-	return aspirantesCursos;
+	//let aspirantesCursos = null;
+	//aspirantesCursos = require('./aspirantes_cursos.json');
+	//return aspirantesCursos;
+	try{
+		let jsonData = JSON.parse(fs.readFileSync('src/aspirantes_cursos.json', 'utf-8'));
+		return jsonData;
+	}catch(error){
+		return [];
+	}
+	
 };
 
 const listarCursos = () => {
@@ -325,16 +333,13 @@ const guardarUsuarios = (usuarios) => {
 		if (err) throw (err);
 		//console.log('Se ha creado el archivo');
 	});
+	
 
 };
 
 const guardarAspirantesCursos = (aspirantesCursos) => {
 	let datos = JSON.stringify(aspirantesCursos);
-	fs.writeFile('src/aspirantes_cursos.json', datos, (err) => {
-		if (err) throw (err);
-		//console.log('Se ha creado el archivo');
-	});
-
+	fs.writeFileSync('src/aspirantes_cursos.json', datos,'utf8');
 };
 
 const mostrarUsuarios = () => {
@@ -356,29 +361,34 @@ const mostrarUsuarios = () => {
 
 const mostrarCursos = (rol, doc, action) => {
 	let cursos = listarCursos();
-
+	//console.log(rol + doc + action);
 	// filtrar cursos a mostrar por rol, el rol corrdinador puede
 	// ver todos los cursos incluso en estado cerrado
-	if (!rol || action === 'cursos_disponibles') {
+	if (!rol || action == 'cursos_disponibles') {
 		cursos = cursos.filter(
 			curso => curso.estado == 'Disponible'
 		);
-	} else if (rol === 'aspirante') {
+		return cursos;
+	} else if (rol == 'aspirante') {
 		let nuevoCursos = [];
 		let aspirantesCursos = cargarAspirantesCursos();
+		console.log("Cursos estudiantes");
+		console.log(aspirantesCursos);
 		let aspiranteCursos = aspirantesCursos.filter(
-			aspiranteCurso => aspiranteCurso.doc_aspirante === doc
+			aspiranteCurso => aspiranteCurso.doc_aspirante == doc
 		);
 		aspiranteCursos.forEach((aspiranteCurso, indice) => {
 			let curso = cursos.find(
-				curso => curso.id === aspiranteCurso.id_curso
+				curso => curso.id == aspiranteCurso.id_curso
 			);
-			if (curso) {
+			if (typeof curso!=='undefined') {
 				nuevoCursos.push(curso);
 			}
 		});
-		cursos = nuevoCursos;
-	} 
+		console.log("Cursos filtrados");
+		console.log(nuevoCursos);
+		return nuevoCursos;
+	}
 	return cursos;
 };
 
@@ -386,26 +396,22 @@ const eliminarAspiranteCurso = (docAspirante, idCurso) => {
 
 	let aspirantesCursos = cargarAspirantesCursos();
 	let resultado = [];
-	
-	let aspiranteCursoIndice = aspirantesCursos.findIndex(
-		aspiranteCurso => aspiranteCurso.doc_aspirante === docAspirante
-		&& aspiranteCurso.id_curso === idCurso
-	);
+	let aspiranteCursoEliminado = aspirantesCursos.filter(
+		lista => lista.doc_aspirante!=docAspirante || lista.id_curso!=idCurso);
 
-	let aspiranteCursoEliminado = aspirantesCursos.splice(aspiranteCursoIndice, 1);
-
-	if (aspiranteCursoEliminado.length > 0) {
+	console.log(aspiranteCursoEliminado);
+	if (aspiranteCursoEliminado!=null) {
 		resultado['estado'] = 'ok';
 		resultado['id_curso'] = idCurso;
-		resultado['boton'] = 'actualizar';
+		resultado['boton'] = 'remover';
 		resultado['msg'] = `El aspirante con documento ${docAspirante} se elimino correctamente
 			del curso con codigo ${idCurso}`;
-		guardarAspirantesCursos(aspirantesCursos);
+		guardarAspirantesCursos(aspiranteCursoEliminado);
 		return resultado;
 	} else {
 		resultado['estado'] = 'error';
 		resultado['id_curso'] = idCurso;
-		resultado['boton'] = 'actualizar';
+		resultado['boton'] = 'remover';
 		resultado['msg'] = `En este momento no es posible eliminar al aspirante con documento 
 			${docAspirante} del curso con codigo ${idCurso}. Por favor intente mas tarde`;
 		return resultado;

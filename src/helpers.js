@@ -26,8 +26,7 @@ hbs.registerHelper('validarCampos', (resultado, formulario, campo, claseCss, tip
 });
 
 hbs.registerHelper('alertaValidarCampos', (boton, tipoForm) => {
-
-	if (boton === tipoForm) {
+	if (boton == tipoForm) {
 		return true;
 	}
 	return false;
@@ -42,9 +41,17 @@ hbs.registerHelper('mostrarAlerta', (resultado) => {
 	return '';
 });
 
-hbs.registerHelper('permitirInscribir', (rol) => {
+hbs.registerHelper('permitirInscribir', (rol,action) => {
+	console.log(rol+action);
+	if (rol == 'aspirante' && action =='cursos_disponibles') {
+		return true;
+	} 
+	return false;
+});
 
-	if (!rol || rol === 'aspirante') {
+hbs.registerHelper('permitirInscribirRol', rol => {
+
+	if (rol == 'aspirante') {
 		return true;
 	} 
 	return false;
@@ -60,7 +67,7 @@ hbs.registerHelper('mostrarFormAlInscribir', (inscribirIdCurso, actualIdCurso) =
 
 hbs.registerHelper('listarAspirantesXCurso', (rol) => {
 
-	if (rol === 'coordinador' || rol.indexOf('coordinador') !== -1) {
+	if (rol === 'coordinador' || (rol!=null && rol.indexOf('coordinador') !== -1)) {
 		return true;
 	}
 
@@ -94,4 +101,14 @@ hbs.registerHelper('mostrarPorRol', (rolActual, rolPermitido, rolPermitido2) => 
 
 hbs.registerHelper('append', (cadena1, cadena2) => {
 	return `${cadena1}${cadena2}`;
+});
+
+hbs.registerHelper('ifeq', function (a, b, options) {
+    if (a == b) { return options.fn(this); }
+    return options.inverse(this);
+});
+
+hbs.registerHelper('ifnoteq', function (a, b, options) {
+    if (a != b) { return options.fn(this); }
+    return options.inverse(this);
 });

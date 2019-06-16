@@ -1,0 +1,12 @@
+<div class="container">
+	<form action="/eliminar?rol={{rol}}&action={{formulario.action}}&doc={{formulario.doc}}" method="post">
+		<input type="hidden" name="id_curso" value="{{id}}">
+		<input type="hidden" name="doc_aspirante" value="{{formulario.doc}}">
+		<input type="hidden" name="action" value="{{formulario.action}}">
+    	<div class="row">
+			<div class="form-group col">
+    			<button class="btn btn-secondary" name="boton" value="remover">Remover</button>
+    		</div>
+    	</div>
+    </form>
+</div>
