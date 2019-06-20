@@ -348,11 +348,10 @@ const mostrarUsuarios = () => {
 	let usuarios = listarUsuarios();
 
 	aspirantes.forEach((aspirante, indice) => {
-		let usuario = usuarios.find((usuario) => usuario.doc === aspirante.doc);
+		let usuario = usuarios.find((usuario) => usuario.doc == aspirante.doc);
 
 		if (usuario) {
 			aspirantes[indice].rol = usuario.rol;
-
 		}
 	});
 
@@ -399,7 +398,7 @@ const eliminarAspiranteCurso = (docAspirante, idCurso) => {
 	let aspiranteCursoEliminado = aspirantesCursos.filter(
 		lista => lista.doc_aspirante!=docAspirante || lista.id_curso!=idCurso);
 
-	console.log(aspiranteCursoEliminado);
+	console.log(docAspirante + "id" + idCurso);
 	if (aspiranteCursoEliminado!=null) {
 		resultado['estado'] = 'ok';
 		resultado['id_curso'] = idCurso;

@@ -42,7 +42,6 @@ hbs.registerHelper('mostrarAlerta', (resultado) => {
 });
 
 hbs.registerHelper('permitirInscribir', (rol,action) => {
-	console.log(rol+action);
 	if (rol == 'aspirante' && action =='cursos_disponibles') {
 		return true;
 	} 
@@ -83,7 +82,7 @@ hbs.registerHelper('mostrarAspirantesXCurso', (idCurso) => {
 
 hbs.registerHelper('mostrarUsuarios', (rol) => {
 	let usuarios = [];
-	if (rol === 'coordinador') {
+	if (rol == 'coordinador') {
 		usuarios = mostrarUsuarios();
 	}
 

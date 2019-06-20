@@ -12,6 +12,16 @@
 		</div>
 	</div>
 {{/if}}
+{{#if (alertaValidarCampos resultado.boton 'inscribirAspCurso')}}
+	<div class="row">
+		<div class="bs-component" align="center" style="margin-left: 92px">
+			<div class="alert alert-dismissible alert-{{mostrarAlerta resultado}}">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>{{resultado.estado}}!</strong> {{resultado.msg}}
+			</div>
+		</div>
+	</div>
+{{/if}}
 <div class="container">
 	<div class="accordion" id="accordionExample">
 		{{#each (mostrarCursos rol formulario.doc formulario.action)}}

@@ -17,7 +17,7 @@
 		<div class="row">
 			<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'doc' 'has-danger' boton}}{{/if}}">
 				<label for="doc">Documento de identidad</label>
-				<input type="text" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'doc' 'is-invalid' boton}}{{/if}}" placeholder="Documento de identidad" id="doc" name="doc" value="{{formulario.doc}}">
+				<input type="text" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'doc' 'is-invalid' boton}}{{/if}}" placeholder="Documento de identidad" id="doc" name="doc" value="{{formulario.doc}}" disabled>
 			</div>
 			<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'nombre' 'has-danger' boton}}{{/if}}">
 				<label for="nombre">Nombre</label>
@@ -37,14 +37,17 @@
 		<div class="row">
 			{{#if (mostrarPorRol rol 'coordinador')}}
 				<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'rol' 'has-danger' boton}}{{/if}}">
-					<label for="rol">Rol</label>
-					<select name="rol" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'rol' 'is-invalid' boton}}{{/if}}" id="rol" value="{{formulario.rol}}">
+					<label for="rol{{doc}}">Rol</label>
+					<select name="rol{{doc}}" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'rol' 'is-invalid' boton}}{{/if}}" id="rol{{doc}}" value="{{formulario.rol}}">
 						<option value="">Seleccionar...</option>
 						<option value="coordinador">Coordinador</option>
 						<option value="aspirante">Aspirante</option>
 						<option value="docente">Docente</option>
 					</select>
 				</div>
+				<script>
+					document.getElementById("rol{{{doc}}}").value = "{{{formulario.rol}}}";
+				</script>
 			{{/if}}
 			{{#if (mostrarPorRol rol 'interesado' 'aspirante')}}
 				<div class="form-group col{{validarCampos resultado formulario 'password' 'has-danger' boton}}">

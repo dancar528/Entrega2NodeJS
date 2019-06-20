@@ -126,7 +126,7 @@ app.post('/eliminar', (req, res) => {
 
 	let result = [];
 
-	if (req.body.boton == 'remover') {
+	if (req.body.boton == 'remover' || req.body.boton == 'eliminar') {
 		result = eliminarAspiranteCurso(req.body.doc_aspirante, req.body.id_curso);
 	}
 
@@ -137,7 +137,7 @@ app.post('/eliminar', (req, res) => {
 		req.body.doc = result.doc_aspirante;
 	}
 
-	console.log(result);
+	//console.log(result);
 
 	res.render('cursos', {
 		rol: resultado.rol,
