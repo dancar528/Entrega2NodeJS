@@ -137,8 +137,6 @@ app.post('/eliminar', (req, res) => {
 		req.body.doc = result.doc_aspirante;
 	}
 
-	//console.log(result);
-
 	res.render('cursos', {
 		rol: resultado.rol,
 		resultado: result,

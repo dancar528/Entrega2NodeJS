@@ -360,7 +360,6 @@ const mostrarUsuarios = () => {
 
 const mostrarCursos = (rol, doc, action) => {
 	let cursos = listarCursos();
-	//console.log(rol + doc + action);
 	// filtrar cursos a mostrar por rol, el rol corrdinador puede
 	// ver todos los cursos incluso en estado cerrado
 	if (!rol || action == 'cursos_disponibles') {
@@ -371,8 +370,6 @@ const mostrarCursos = (rol, doc, action) => {
 	} else if (rol == 'aspirante') {
 		let nuevoCursos = [];
 		let aspirantesCursos = cargarAspirantesCursos();
-		console.log("Cursos estudiantes");
-		console.log(aspirantesCursos);
 		let aspiranteCursos = aspirantesCursos.filter(
 			aspiranteCurso => aspiranteCurso.doc_aspirante == doc
 		);
@@ -384,8 +381,6 @@ const mostrarCursos = (rol, doc, action) => {
 				nuevoCursos.push(curso);
 			}
 		});
-		console.log("Cursos filtrados");
-		console.log(nuevoCursos);
 		return nuevoCursos;
 	}
 	return cursos;
@@ -398,7 +393,6 @@ const eliminarAspiranteCurso = (docAspirante, idCurso) => {
 	let aspiranteCursoEliminado = aspirantesCursos.filter(
 		lista => lista.doc_aspirante!=docAspirante || lista.id_curso!=idCurso);
 
-	console.log(docAspirante + "id" + idCurso);
 	if (aspiranteCursoEliminado!=null) {
 		resultado['estado'] = 'ok';
 		resultado['id_curso'] = idCurso;
@@ -418,6 +412,11 @@ const eliminarAspiranteCurso = (docAspirante, idCurso) => {
 };
 
 const actualizarUsuario = (nuevosDatos) => {
+	nuevosDatos.doc = nuevosDatos.doc_trigger;
+
+	if (nuevosDatos[`rol${nuevosDatos.doc}`]) {
+		nuevosDatos.rol = nuevosDatos[`rol${nuevosDatos.doc}`];
+	}
 
 	let resultado = [];
 	let camposObligatorios = [];
@@ -466,6 +465,7 @@ const actualizarUsuario = (nuevosDatos) => {
 		delete nuevoAspirante.rol;
 		delete nuevoAspirante.boton;
 		delete nuevoAspirante.doc_trigger;
+		delete nuevoAspirante[`rol${nuevosDatos.doc}`];
 
 		aspirantes[aspiranteIndice] = nuevoAspirante;
 		guardarAspirantes(aspirantes);
