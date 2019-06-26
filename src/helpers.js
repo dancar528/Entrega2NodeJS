@@ -1,13 +1,18 @@
 const hbs = require('hbs');
-const { mostrarCursos, mostrarAspirantesXCurso, mostrarUsuarios } = require('./funciones');
+const {
+	mostrarCursos,
+	mostrarAspirantesXCurso,
+	mostrarUsuarios,
+	listarDocentes
+} = require('./funciones');
 
 hbs.registerHelper('listar', (tipo) => {
 	let elementos = listar(tipo);
 	return elementos;
 });
 
-hbs.registerHelper('crearCursos', (rol) => {
-	if (rol === 'coordinador') return true;
+hbs.registerHelper('listarAspirantesXCursos', (rol) => {
+	if (rol === 'coordinador' || rol === 'docente') return true;
 	return false;
 });
 
@@ -64,15 +69,6 @@ hbs.registerHelper('mostrarFormAlInscribir', (inscribirIdCurso, actualIdCurso) =
 	return '';
 });
 
-hbs.registerHelper('listarAspirantesXCurso', (rol) => {
-
-	if (rol === 'coordinador' || (rol!=null && rol.indexOf('coordinador') !== -1)) {
-		return true;
-	}
-
-	return false;
-});
-
 hbs.registerHelper('mostrarAspirantesXCurso', (idCurso) => {
 
 	let cursosAspirantes = mostrarAspirantesXCurso(idCurso);
@@ -98,6 +94,12 @@ hbs.registerHelper('mostrarPorRol', (rolActual, rolPermitido, rolPermitido2) => 
 	return false;
 });
 
+hbs.registerHelper('listarDocentes', () => {
+	let docentes = listarDocentes();
+
+	return docentes;
+});
+
 hbs.registerHelper('append', (cadena1, cadena2) => {
 	return `${cadena1}${cadena2}`;
 });
@@ -108,6 +110,11 @@ hbs.registerHelper('ifeq', function (a, b, options) {
 });
 
 hbs.registerHelper('ifnoteq', function (a, b, options) {
+    if (a != b) { return options.fn(this); }
+    return options.inverse(this);
+});
+
+hbs.registerHelper('listar', function (a, b, options) {
     if (a != b) { return options.fn(this); }
     return options.inverse(this);
 });

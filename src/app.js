@@ -150,7 +150,7 @@ app.post('/eliminar', (req, res) => {
 app.post('/actualizar', (req, res) => {
 	let resultado = [];
 	if (req.body.boton === 'actualizar') {
-		resultado = actualizarEstadoCurso(req.body.id_curso, req.body.estado);
+		resultado = actualizarEstadoCurso(req.body.id_curso, req.body.estado, req.body.docente);
 	}
 
 	res.render('cursos', {

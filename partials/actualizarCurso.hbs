@@ -1,12 +1,32 @@
-<div class="container" style="margin-bottom: 3em;">
-	<form action="/actualizar?rol={{rol}}" method="post" class="form-inline my-2 my-lg-0">
-		<input type="hidden" name="id_curso" value="{{id}}">
-		<legend class="text-muted">Cambiar estado del curso?</legend>
-		<select name="estado" class="form-control mr-sm-2 coll{{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'estado' 'is-invalid' 'actualizar'}}{{/if}}" id="estado" value="{{formulario.estado}}">
-			<option value="">Seleccione el nuevo estado...</option>
-			<option value="Disponible">Disponible</option>
-			<option value="Cerrado">Cerrado</option>
-		</select>
-		<button class="btn btn-primary my-2 my-sm-0" name="boton" value="actualizar">Actualizar</button>
+<div class="container" style="margin-bottom: 3em; max-width: 400px; margin-left: 0;">
+	<form action="/actualizar?rol={{rol}}" method="post">
+		<div class="row">
+			<div class="form-group col">
+				<input type="hidden" name="id_curso" value="{{id}}">
+				<label><strong>Cambiar estado del curso?</strong></label>
+				<select name="estado" class="form-control {{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'estado' 'is-invalid' 'actualizar'}}{{/if}}" id="estado" value="{{formulario.estado}}">
+					<option value="">Seleccione el nuevo estado...</option>
+					<option value="Disponible">Disponible</option>
+					<option value="Cerrado">Cerrado</option>
+				</select>
+			</div>
+		</div>
+		<div class="row">
+			<div class="form-group col">
+				<input type="hidden" name="doc_docente" value="{{docente}}">
+				<label for="docente"><strong>Asignar docente</strong></label>
+				<select name="docente" class="form-control" id="docente" value="{{formulario.docente}}">
+					<option value="">Seleccione el docente...</option>
+					{{#each (listarDocentes)}}
+						<option value="{{doc}}">{{nombre}}</option>
+					{{/each}}
+				</select>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<button class="btn btn-primary" name="boton" value="actualizar">Actualizar</button>
+			</div>
+		</div>
 	</form>
 </div>

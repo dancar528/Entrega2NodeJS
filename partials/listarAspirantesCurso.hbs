@@ -17,7 +17,9 @@
     					<td>{{nombre}}</td>
     					<td>{{correo}}</td>
     					<td>{{telefono}}</td>
-    					<td><button type="submit" class="btn btn-primary" name="boton" value="eliminar">Eliminar</button></td>
+	    				{{#ifeq ../rol 'coordinador'}}
+	    				    <td><button type="submit" class="btn btn-primary" name="boton" value="eliminar">Eliminar</button></td>
+	    				{{/ifeq}}
 					</form>
 				</tr>
 			{{/each}}

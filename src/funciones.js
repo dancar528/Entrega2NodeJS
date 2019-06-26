@@ -218,16 +218,16 @@ const crearAspiranteCurso = (nuevoAspiranteCurso) => {
 	return resultado;
 };
 
-const actualizarEstadoCurso = (idCurso, nuevoEstado) => {
+const actualizarEstadoCurso = (idCurso, nuevoEstado, docente) => {
 	let resultado = [];
 	let camposObligatorios = [];
 	if (!idCurso) {
 		camposObligatorios.push('id');
 	}
 
-	if (!nuevoEstado) {
+	/*if (!nuevoEstado) {
 		camposObligatorios.push('estado');
-	}
+	}*/
 
 	if (camposObligatorios.length > 0) {
 		resultado['camposObligatorios'] = camposObligatorios;
@@ -250,6 +250,7 @@ const actualizarEstadoCurso = (idCurso, nuevoEstado) => {
 		return resultado;
 	} else {
 		cursos[cursoIndice].estado = nuevoEstado; 
+		cursos[cursoIndice].docente = docente;
 		guardarCursos(cursos);
 		resultado['estado'] = 'ok';
 		resultado['boton'] = 'actualizar';
@@ -382,6 +383,12 @@ const mostrarCursos = (rol, doc, action) => {
 			}
 		});
 		return nuevoCursos;
+	} else if (rol == 'docente') {
+		let nuevoCursos = [];
+		nuevoCursos = cursos.filter(
+			curso => curso.docente == doc
+		);
+		return nuevoCursos;
 	}
 	return cursos;
 };
@@ -511,6 +518,21 @@ const ingresar = (usuarioAValidar) => {
 	return resultado;
 };
 
+const listarDocentes = () => {
+	let usuarios = listarUsuarios();
+	let usuariosDocentes = usuarios.filter((usuario) => usuario.rol === 'docente');
+
+	if (usuariosDocentes.length === 0) return [];
+	let docentes = [];
+
+	usuariosDocentes.forEach((usuario, indice) => {
+		let docente = listarAspirantes().find((aspirante) => aspirante.doc === usuario.doc);
+		docentes.push(docente);
+	});
+
+	return docentes;
+};
+
 module.exports = {
 	mostrarCursos: mostrarCursos,
 	crearCurso: crearCurso,
@@ -521,5 +543,6 @@ module.exports = {
 	ingresar: ingresar,
 	crearAspiranteCurso: crearAspiranteCurso,
 	mostrarUsuarios: mostrarUsuarios,
-	actualizarUsuario: actualizarUsuario
+	actualizarUsuario: actualizarUsuario,
+	listarDocentes: listarDocentes
 };

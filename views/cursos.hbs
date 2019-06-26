@@ -1,7 +1,7 @@
 {{>header}}
-{{#if (crearCursos rol)}}
+{{#ifeq rol 'coordinador'}}
 	{{>formCrearCurso}}
-{{/if}}
+{{/ifeq}}
 {{#if (alertaValidarCampos resultado.boton 'remover')}}
 	<div class="row">
 		<div class="bs-component" align="center" style="margin-left: 92px">
@@ -36,10 +36,11 @@
 			    <table class="table table-bordered table-sm">
 					<thead class="thead-dark">
 						<tr>
-							{{#if (listarAspirantesXCurso ../rol)}}
+							{{#ifeq ../rol 'coordinador'}}
 								<th scope="col">Estado</th>
 								<th scope="col">ID</th>
-							{{/if}}
+								<th scope="col">Docente</th>
+							{{/ifeq}}
 							<th scope="col">Nombre</th>
 							<th scope="col">Descripcion</th>
 							<th scope="col">Valor</th>
@@ -47,10 +48,11 @@
 					</thead>
 					<tbody>
 						<tr>
-							{{#if (listarAspirantesXCurso ../rol)}}
+							{{#ifeq ../rol 'coordinador'}}
 								<td scope="col">{{estado}}</td>
 								<td scope="col">{{id}}</td>
-							{{/if}}
+								<td scope="col">{{docente}}</td>
+							{{/ifeq}}
 							<td scope="col">{{nombre}}</td>
 							<td scope="col">{{descripcion}}</td>
 							<td scope="col">{{valor}}</td>						
@@ -100,12 +102,14 @@
 						</div>
 					{{/if}}
 				{{/if}}
-		        {{#if (listarAspirantesXCurso ../rol)}}
-			        {{>actualizarCurso rol=../rol resultado=../resultado formulario=../formulario}}
-		        	{{#if (mostrarAspirantesXCurso id)}}
+		        {{#ifeq ../rol 'coordinador'}}
+			        {{>actualizarCurso rol=../rol resultado=../resultado formulario=../formulario}}	
+		        {{/ifeq}}
+		        {{#if (listarAspirantesXCursos ../rol)}}
+			        {{#if (mostrarAspirantesXCurso id)}}
 			        	{{>listarAspirantesCurso rol=../rol id=id}}
 		        	{{/if}}
-		        {{/if}}
+	        	{{/if}}
 		      </div>
 		    </div>
 		  </div>

@@ -17,24 +17,31 @@
 
 	            <div class="collapse navbar-collapse" id="navbarColor01">
 	              <ul class="navbar-nav mr-auto">
-	              	{{#if (crearCursos rol)}}
+	               {{#ifeq rol 'coordinador'}}
+		              <li class="nav-item">
+		                <a class="nav-link" href="/cursos?rol=coordinador">Todos los Cursos</span></a>
+		              </li>
+		           {{/ifeq}}
+	                {{#ifnoteq rol 'docente'}}
 		                <li class="nav-item">
-		                  <a class="nav-link" href="/cursos?rol=coordinador">Todos los Cursos</span></a>
+		                  <a class="nav-link" href="/cursos?rol={{rol}}&doc={{formulario.doc}}&action=cursos_disponibles">Cursos Disponibles</a>
 		                </li>
-		            {{/if}}
-	                <li class="nav-item">
-	                  <a class="nav-link" href="/cursos?rol={{rol}}&doc={{formulario.doc}}&action=cursos_disponibles">{{doc}}Cursos Disponibles</a>       	         
-	                </li>
+	                {{/ifnoteq}}
 	                {{#if (permitirInscribirRol rol)}}
 		                <li class="nav-item">
 		                  <a class="nav-link" href="/cursos?rol=aspirante&doc={{formulario.doc}}&action=cursosinscritos">Mis Cursos</a>
 		                </li>
 	                {{/if}}
-	                {{#if (crearCursos rol)}}
+	                {{#ifeq rol 'coordinador'}}
 	                	<li class="nav-item">
 		                  <a class="nav-link" href="/usuarios?rol={{rol}}">Administrar Usuarios</a>
 		                </li>
-	                {{/if}}
+	                {{/ifeq}}
+	                {{#ifeq rol 'docente'}}
+	                  <li class="nav-item">
+		                  <a class="nav-link" href="/cursos?rol={{rol}}&doc={{formulario.doc}}&action=cursosinscritos">Cursos Asignados</a>
+		              </li>
+	                {{/ifeq}}
 	              </ul>
 	              <div class="form-inline">
 					<div class="dropdown">
