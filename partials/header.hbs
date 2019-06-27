@@ -17,49 +17,61 @@
 
 	            <div class="collapse navbar-collapse" id="navbarColor01">
 	              <ul class="navbar-nav mr-auto">
-	               {{#ifeq rol 'coordinador'}}
-		              <li class="nav-item">
-		                <a class="nav-link" href="/cursos?rol=coordinador">Todos los Cursos</span></a>
-		              </li>
-		           {{/ifeq}}
-	                {{#ifnoteq rol 'docente'}}
+	                {{#if sesion}}
+		                {{#ifeq rol_sesion 'coordinador'}}
+			              <li class="nav-item">
+			                <a class="nav-link" href="/cursos?rol={{rol_sesion}}">Todos los Cursos</span></a>
+			              </li>
+			            {{/ifeq}}
+		           	{{/if}}
+	                {{#ifnoteq rol_sesion 'docente'}}
 		                <li class="nav-item">
-		                  <a class="nav-link" href="/cursos?rol={{rol}}&doc={{formulario.doc}}&action=cursos_disponibles">Cursos Disponibles</a>
+		                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{formulario.doc}}&action=cursos_disponibles">Cursos Disponibles</a>
 		                </li>
 	                {{/ifnoteq}}
-	                {{#if (permitirInscribirRol rol)}}
-		                <li class="nav-item">
-		                  <a class="nav-link" href="/cursos?rol=aspirante&doc={{formulario.doc}}&action=cursosinscritos">Mis Cursos</a>
-		                </li>
+	                {{#if sesion}}
+		                {{#ifeq rol_sesion 'aspirante'}}
+			                <li class="nav-item">
+			                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{formulario.doc}}&action=cursosinscritos">Mis Cursos</a>
+			                </li>
+		                {{/ifeq}}
 	                {{/if}}
-	                {{#ifeq rol 'coordinador'}}
-	                	<li class="nav-item">
-		                  <a class="nav-link" href="/usuarios?rol={{rol}}">Administrar Usuarios</a>
-		                </li>
-	                {{/ifeq}}
-	                {{#ifeq rol 'docente'}}
-	                  <li class="nav-item">
-		                  <a class="nav-link" href="/cursos?rol={{rol}}&doc={{formulario.doc}}&action=cursosinscritos">Cursos Asignados</a>
-		              </li>
-	                {{/ifeq}}
+	                {{#if sesion}}
+		                {{#ifeq rol_sesion 'coordinador'}}
+		                	<li class="nav-item">
+			                  <a class="nav-link" href="/usuarios?rol={{rol_sesion}}">Administrar Usuarios</a>
+			                </li>
+		                {{/ifeq}}
+	                {{/if}}
+	                {{#if sesion}}
+		                {{#ifeq rol_sesion 'docente'}}
+		                  <li class="nav-item">
+			                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{formulario.doc}}&action=cursosinscritos">Cursos Asignados</a>
+			              </li>
+		                {{/ifeq}}
+	                {{/if}}
 	              </ul>
 	              <div class="form-inline">
 					<div class="dropdown">
-						{{#ifeq rol ""}}
-							<span class="badge badge-secondary dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	                	{{#if sesion}}
+							{{#ifnoteq rol_sesion ''}}
+								<button class="badge badge-secondary dropdown-toggle btn btn-secondary" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<span class="mr-2">{{nombre_usuario}} ({{rol_sesion}})</span>
+									<img src="img/footerIcon.jpg" alt="{{rol_sesion}}" width="24" height="24" title="{{rol_sesion}}" style="border-radius:0.5rem;">
+								</button>
+								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+									<a class="dropdown-item" href="/salir">Cerrar sesión</a>
+								</div>
+							{{/ifnoteq}}
+						{{else}}
+							<button class="badge badge-secondary dropdown-toggle btn btn-secondary" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 								<span class="mr-2">Aún no se ha autenticado</span>
-								<img src="img/footerIcon.jpg" alt="{{rol}}" width="24" height="24" title="{{rol}}" style="border-radius:0.5rem;">
-							</span>
-						{{/ifeq}}
-						{{#ifnoteq rol ""}} 
-							<span class="badge badge-secondary dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-								<span class="mr-2">{{rol}}</span>
-								<img src="img/footerIcon.jpg" alt="{{rol}}" width="24" height="24" title="{{rol}}" style="border-radius:0.5rem;">
-							</span>
+								<img src="img/footerIcon.jpg" alt="{{rol_sesion}}" width="24" height="24" title="{{rol_sesion}}" style="border-radius:0.5rem;">
+							</button>
 							<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-								<a class="dropdown-item" href="/salir">Cerrar sesión</a>
+								<a class="dropdown-item" href="/">Iniciar sesión</a>
 							</div>
-						{{/ifnoteq}}
+		                {{/if}}
 					</div>
         		</div>
 	            </div>
@@ -68,7 +80,7 @@
     </div>
     <div class="jumbotron jumbotron-fluid" style="margin-top: 3em;">
 	  <div class="container">
-	  	<h3 class="display-5">Bienvenidos a la</h3>
+	  	<h3 class="display-5">Bienvenidos a la {{rol_sesion}}</h3>
 	    <h1 class="display-4">Universidad Virtual de Colombia UVC</h1>
 	    <p class="lead">Especializada en tecnologias de la informacion, las cuales puedes aprender desde cualquier lugar del mundo solo con tener un computador a la mano :)</p>
 	  </div>

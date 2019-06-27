@@ -17,7 +17,7 @@
 		<div class="row">
 			<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'doc' 'has-danger' boton}}{{/if}}">
 				<label for="doc">Documento de identidad</label>
-				<input type="text" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'doc' 'is-invalid' boton}}{{/if}}" placeholder="Documento de identidad" id="doc" name="doc" value="{{formulario.doc}}" disabled>
+				<input type="text" class="form-control{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'doc' 'is-invalid' boton}}{{/if}}" placeholder="Documento de identidad" id="doc" name="doc" value="{{formulario.doc}}">
 			</div>
 			<div class="form-group col{{#if (mostrarFormAlInscribir resultado.doc_trigger doc)}}{{validarCampos resultado formulario 'nombre' 'has-danger' boton}}{{/if}}">
 				<label for="nombre">Nombre</label>
@@ -49,12 +49,12 @@
 					document.getElementById("rol{{{doc}}}").value = "{{{formulario.rol}}}";
 				</script>
 			{{/if}}
-			{{#if (mostrarPorRol rol 'interesado' 'aspirante')}}
+			{{#ifeq rol 'interesado'}}
 				<div class="form-group col{{validarCampos resultado formulario 'password' 'has-danger' boton}}">
 					<label for="password">Contraseña</label>
 					<input type="password" class="form-control{{validarCampos resultado formulario 'password' 'is-invalid' boton}}" placeholder="Contraseña" id="password" name="password" value="{{formulario.password}}">
 				</div>
-			{{/if}}
+				{{/ifeq}}
 			<div class="col">
 			</div>
 		</div>

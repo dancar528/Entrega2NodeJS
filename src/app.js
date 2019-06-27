@@ -3,6 +3,8 @@ const app = express();
 const path = require('path');
 const hbs = require('hbs');
 const bodyParser = require('body-parser');
+const session = require('express-session');
+const jwt = require('jsonwebtoken');
 require('./helpers');
 const {
 	crearCurso,
@@ -11,11 +13,19 @@ const {
 	eliminarAspiranteCurso,
 	ingresar,
 	crearAspiranteCurso,
-	actualizarUsuario
+	actualizarUsuario,
+	consultarAspirante
 } = require('./funciones');
 
 var resultado=null;
 var formulario=null;
+
+/*if (typeof localStorage === 'undefined' || localStorage === null) {
+	// si no existe un local storage, crea una carpeta llamada scratch
+	// para almacenar la info
+	var LocalStorage = require('node-localstorage').LocalStorage;
+	localStorage = new LocalStorage('./scratch');
+}*/
 
 const directorioPublico = path.join(__dirname, '../public');
 const directorioPartials = path.join(__dirname, '../partials');
@@ -25,16 +35,48 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.set('view engine', 'hbs');
 
+app.use(session({
+	secret: ' ',
+	resave: false,
+	saveUninitialized: true
+}));
+
+app.use((req, res, next) => {
+	if (req.session.nombre) {
+		res.locals.sesion = true;
+		res.locals.rol_sesion = req.session.rol;
+		res.locals.nombre_usuario = req.session.nombre;
+	} else {
+		res.locals.sesion = false;
+	    res.locals.rol_sesion = 'interesado';
+	    res.locals.nombre_usuario = '';
+	}
+	// Almacenando la info del usuario como token, en vez de variable de sesion
+	/*let token = localStorage.getItem('token');
+	jwt.verify(token, 'tdea-virtual', (err, decoded) => {
+		if (err) {
+			console.log(err);
+			return next();
+		}
+		console.log(decoded);
+		res.locals.sesion = true;
+		res.locals.rol_sesion = decoded.data;
+		next();
+	});	*/
+	next();
+});
+
 app.get('/', (req, res) => {
 	if (resultado!=null && resultado.estado === 'ok') {
 		res.render('cursos', {
-			rol: resultado.rol,
+			rol: res.locals.rol_sesion,
 			resultado: resultado,
 			formulario: formulario,
 			action:'cursos_disponibles',
 			loggeado: (resultado!=null && resultado.estado === 'ok')
 		});
 	}else{
+
 		res.render('index', {
 			rol: '',
 			loggeado: (resultado!=null && resultado.estado === 'ok')
@@ -47,8 +89,18 @@ app.post('/', (req, res) => {
 
 	resultado = ingresar(req.body);
 	formulario = req.body;
-
 	if (resultado.estado === 'ok') {
+
+		let usuario = consultarAspirante(req.body.doc);
+		res.locals.sesion = true;
+	    res.locals.rol_sesion = resultado.rol;
+	    res.locals.nombre_usuario = usuario.nombre;
+		req.session.rol = resultado.rol;
+		req.session.nombre = usuario.nombre;
+		/*let token = jwt.sign({
+				data: resultado.rol,
+			}, 'tdea-virtual', { expiresIn: '1h'});
+		localStorage.setItem('token', token);*/
 		res.render('cursos', {
 			rol: resultado.rol,
 			resultado: resultado,
@@ -67,10 +119,9 @@ app.post('/', (req, res) => {
 });
 
 app.get('/cursos', (req, res) => {
-
-	if (resultado!=null && resultado.rol=='coordinador') {
+	if (resultado != null && res.locals.rol_sesion == 'coordinador') {
 		res.render('cursos', {
-			rol: resultado==null ? '' : resultado.rol,
+			rol: resultado==null ? '' : res.locals.rol_sesion,
 			resultado: resultado,
 			formulario: req.query,
 			cursosInscritos: req.query.action,
@@ -81,7 +132,7 @@ app.get('/cursos', (req, res) => {
 
 	if (req.query.action=='cursos_disponibles') {
 		res.render('cursos', {
-			rol: resultado==null ? '' : resultado.rol,
+			rol: resultado==null ? '' : res.locals.rol_sesion,
 			resultado: resultado,
 			formulario: req.query,
 			cursosInscritos: req.query.action,
@@ -92,7 +143,7 @@ app.get('/cursos', (req, res) => {
 		if (req.query.action=='cursosinscritos'){
 			if(resultado!=null && resultado.estado === 'ok'){
 				res.render('cursos', {
-					rol: resultado==null ? '' : resultado.rol,
+					rol: resultado==null ? '' : res.locals.rol_sesion,
 					resultado: resultado,
 					formulario: req.query,
 					cursosInscritos: req.query.action,
@@ -112,9 +163,8 @@ app.get('/cursos', (req, res) => {
 });
 
 app.post('/cursos', (req, res) => {
-
 	res.render('cursos', {
-		rol: req.query.rol,
+		rol: res.locals.rol_sesion,
 		formulario: req.body,
 		action:req.query.action,
 	});
@@ -138,7 +188,7 @@ app.post('/eliminar', (req, res) => {
 	}
 
 	res.render('cursos', {
-		rol: resultado.rol,
+		rol: res.locals.rol_sesion,
 		resultado: result,
 		formulario: req.query,
 		cursosInscritos: req.query.action,
@@ -148,13 +198,14 @@ app.post('/eliminar', (req, res) => {
 });
 
 app.post('/actualizar', (req, res) => {
+
 	let resultado = [];
 	if (req.body.boton === 'actualizar') {
 		resultado = actualizarEstadoCurso(req.body.id_curso, req.body.estado, req.body.docente);
 	}
 
 	res.render('cursos', {
-		rol: req.query.rol,
+		rol: res.locals.rol_sesion,
 		resultado: resultado,
 		formulario: req.body,
 		action:req.query.action
@@ -177,7 +228,7 @@ app.post('/crear', (req, res) => {
 	}
 
 	res.render('cursos', {
-		rol: req.query.rol,
+		rol: res.locals.rol_sesion,
 		resultado: resultado,
 		formulario: req.body
 	});
@@ -190,18 +241,18 @@ app.post('/registro', (req, res) => {
 		resultado = crearAspirante(req.body);
 	}
 	let parametros = {
-		rol: resultado.rol,
+		rol: res.locals.rol_sesion,
 		resultado: resultado,
 		formulario: req.body
 	};
-
 	res.render('formCrearUsuario', parametros);
 });
 
 app.get('/usuarios', (req, res) => {
+
 	if (resultado!=null && resultado.estado === 'ok') {
 		res.render('adminUsuarios', {
-			rol: req.query.rol,
+			rol: res.locals.rol_sesion,
 			loggeado: (resultado!=null && resultado.estado === 'ok')
 		});
 	}else{
@@ -217,7 +268,7 @@ app.post('/usuarios', (req, res) => {
 	let resultado = actualizarUsuario(req.body);
 
 	res.render('adminUsuarios', {
-		rol: req.query.rol,
+		rol: res.locals.rol_sesion,
 		resultado: resultado,
 		formulario: req.body
 	});
@@ -240,7 +291,7 @@ app.post('/inscribirAspCurso', (req, res) => {
 	}
 
 	res.render('cursos', {
-		rol: req.query.rol,
+		rol: res.locals.rol_sesion,
 		resultado: resultado,
 		formulario: req.body,
 		action: 'cursos_disponibles',
@@ -250,16 +301,23 @@ app.post('/inscribirAspCurso', (req, res) => {
 
 app.get('/registro', (req, res) => {
 	res.render('formCrearUsuario', {
-		rol: req.query.rol,
+		rol: res.locals.rol_sesion,
 		loggeado: (resultado!=null && resultado.estado === 'ok')
 	});
 });
 
 app.get('/salir', (req, res) => {
+	// Al salir, eliminamos variables de sesion
+	//localStorage.setItem('token', '');
 	resultado = null;
 	formulario=null;
+	res.locals.sesion = false;
+	res.locals.rol_sesion = 'interesado';
+	res.locals.nombre_usuario = '';
+	req.session.rol = 'interesado';
+	req.session.nombre = '';
 	res.render('index', {
-		rol: '',
+		rol: res.locals.rol_sesion,
 		loggeado: (resultado!=null && resultado.estado === 'ok')
 	});
 	

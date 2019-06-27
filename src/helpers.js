@@ -53,14 +53,6 @@ hbs.registerHelper('permitirInscribir', (rol,action) => {
 	return false;
 });
 
-hbs.registerHelper('permitirInscribirRol', rol => {
-
-	if (rol == 'aspirante') {
-		return true;
-	} 
-	return false;
-});
-
 hbs.registerHelper('mostrarFormAlInscribir', (inscribirIdCurso, actualIdCurso) => {
 
 	if (inscribirIdCurso === actualIdCurso) {
@@ -110,11 +102,6 @@ hbs.registerHelper('ifeq', function (a, b, options) {
 });
 
 hbs.registerHelper('ifnoteq', function (a, b, options) {
-    if (a != b) { return options.fn(this); }
-    return options.inverse(this);
-});
-
-hbs.registerHelper('listar', function (a, b, options) {
     if (a != b) { return options.fn(this); }
     return options.inverse(this);
 });

@@ -1,4 +1,5 @@
 const fs = require('fs');
+const bcrypt = require('bcrypt');
 
 const cargarAspirantesCursos = () => {
 	//let aspirantesCursos = null;
@@ -149,13 +150,14 @@ const crearAspirante = (nuevoAspirante) => {
 		let defaultRol = 'aspirante';
 		let usuario = {
 			doc: nuevoAspirante.doc,
-			password: nuevoAspirante.password,
+			password: bcrypt.hashSync(nuevoAspirante.password, 10),
 			rol: defaultRol
 		};
 		resultado['boton'] = nuevoAspirante.boton;
 		resultado['rol'] = defaultRol;
 		delete nuevoAspirante.boton;
 		delete nuevoAspirante.password;
+		delete nuevoAspirante.doc_trigger;
 		aspirantes.push(nuevoAspirante);
 		guardarAspirantes(aspirantes);
 		let usuarios = listarUsuarios();
@@ -503,7 +505,8 @@ const ingresar = (usuarioAValidar) => {
 
 	let usuarios = listarUsuarios();
 	let usuario = usuarios.find(usuario => 
-		usuario.doc == usuarioAValidar.doc && usuario.password === usuarioAValidar.password
+		usuario.doc == usuarioAValidar.doc
+			&& bcrypt.compareSync(usuarioAValidar.password, usuario.password)
 	);
 
 	if (!usuario) {
@@ -533,6 +536,13 @@ const listarDocentes = () => {
 	return docentes;
 };
 
+const consultarAspirante = (doc) => {
+	let aspirante = {};
+	aspirante = listarAspirantes().find((aspirante) => aspirante.doc === doc);
+
+	return aspirante;
+};
+
 module.exports = {
 	mostrarCursos: mostrarCursos,
 	crearCurso: crearCurso,
@@ -544,5 +554,6 @@ module.exports = {
 	crearAspiranteCurso: crearAspiranteCurso,
 	mostrarUsuarios: mostrarUsuarios,
 	actualizarUsuario: actualizarUsuario,
-	listarDocentes: listarDocentes
+	listarDocentes: listarDocentes,
+	consultarAspirante: consultarAspirante
 };

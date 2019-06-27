@@ -33,7 +33,7 @@
 			    </div>
 			    <div id="collapse{{@index}}" class="collapse {{mostrarFormAlInscribir ../resultado.doc_trigger doc}}" aria-labelledby="heading{{@index}}" data-parent="#accordionExample">
 			      	<div class="card-body">
-			      		{{>formUsuario action=(append 'usuarios?rol=' ../rol) formulario=this boton='actualizar' resultado=../resultado doc=doc rol=../rol}}
+			      		{{>formUsuario action='usuarios' formulario=this boton='actualizar' resultado=../resultado doc=doc rol=../rol}}
 			    	</div>
 			    </div>
 			</div>

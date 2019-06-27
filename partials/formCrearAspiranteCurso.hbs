@@ -1,6 +1,6 @@
 <div class="container">
 	{{#ifeq rol "aspirante"}}
-		<form action="/inscribirAspCurso?rol={{rol}}&action={{formulario.action}}&doc={{formulario.doc}}" method="post">
+		<form action="/inscribirAspCurso?action={{formulario.action}}&doc={{formulario.doc}}" method="post">
 			<input type="hidden" name="id_curso" value="{{id}}">
 			<input type="hidden" name="doc_aspirante" value="{{formulario.doc}}">
 			<input type="hidden" name="action" value="{{formulario.action}}">
