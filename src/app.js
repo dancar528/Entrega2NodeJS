@@ -5,6 +5,7 @@ const hbs = require('hbs');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 require('./helpers');
 const {
 	crearCurso,
@@ -42,14 +43,12 @@ app.use(session({
 }));
 
 app.use((req, res, next) => {
-	if (req.session.nombre) {
+
+	if (req.session.rol) {
 		res.locals.sesion = true;
 		res.locals.rol_sesion = req.session.rol;
 		res.locals.nombre_usuario = req.session.nombre;
-	} else {
-		res.locals.sesion = false;
-	    res.locals.rol_sesion = 'interesado';
-	    res.locals.nombre_usuario = '';
+		res.locals.doc_sesion = req.session.doc;
 	}
 	// Almacenando la info del usuario como token, en vez de variable de sesion
 	/*let token = localStorage.getItem('token');
@@ -65,6 +64,17 @@ app.use((req, res, next) => {
 	});	*/
 	next();
 });
+
+mongoose.connect(
+	'mongodb://localhost:27017/educacionContinua',
+	{ useNewUrlParser: true},
+	(err, resultado) => {
+		if (err) {
+			return console.log(err);
+		}
+		console.log('Conectado');
+	}
+);
 
 app.get('/', (req, res) => {
 	if (resultado!=null && resultado.estado === 'ok') {
@@ -87,79 +97,50 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
 
-	resultado = ingresar(req.body);
 	formulario = req.body;
-	if (resultado.estado === 'ok') {
+	ingresar(req.body, (resultado) => {
 
-		let usuario = consultarAspirante(req.body.doc);
-		res.locals.sesion = true;
-	    res.locals.rol_sesion = resultado.rol;
-	    res.locals.nombre_usuario = usuario.nombre;
-		req.session.rol = resultado.rol;
-		req.session.nombre = usuario.nombre;
-		/*let token = jwt.sign({
-				data: resultado.rol,
-			}, 'tdea-virtual', { expiresIn: '1h'});
-		localStorage.setItem('token', token);*/
-		res.render('cursos', {
-			rol: resultado.rol,
-			resultado: resultado,
-			formulario: req.body,
-			action:'cursosinscritos',
-			loggeado: (resultado!=null && resultado.estado === 'ok')
-		});
-	} else {
-		res.render('index', {
-			rol: resultado.rol,
-			resultado: resultado,
-			formulario: req.body,
-			loggeado: (resultado!=null && resultado.estado === 'ok')
-		});
-	}
+	    if (resultado.estado === 'ok') {
+	    	req.session.rol = resultado.rol;
+			res.locals.sesion = true;
+	    	res.locals.rol_sesion = resultado.rol;
+	    	consultarAspirante(req.body.doc, (usuario) => {
+			    res.locals.nombre_usuario = usuario.nombre;
+			    res.locals.doc_sesion = usuario.doc;
+				req.session.nombre = usuario.nombre;
+				req.session.doc = usuario.doc;
+				/*let token = jwt.sign({
+						data: resultado.rol,
+					}, 'tdea-virtual', { expiresIn: '1h'});
+				localStorage.setItem('token', token);*/
+				res.render('cursos', {
+					rol: resultado.rol,
+					resultado: resultado,
+					formulario: req.body,
+					action: 'cursosinscritos'
+				});
+			});
+	    } else {
+	    	req.session.rol = 'interesado';
+	    	res.locals.rol_sesion = 'interesado';
+
+			res.render('index', {
+				rol: resultado.rol,
+				resultado: resultado,
+				formulario: req.body
+			});
+		}
+	});
 });
 
 app.get('/cursos', (req, res) => {
-	if (resultado != null && res.locals.rol_sesion == 'coordinador') {
-		res.render('cursos', {
-			rol: resultado==null ? '' : res.locals.rol_sesion,
-			resultado: resultado,
-			formulario: req.query,
-			cursosInscritos: req.query.action,
-			action:req.query.action,
-			loggeado: (resultado!=null && resultado.estado === 'ok')
-		});
-	}
-
-	if (req.query.action=='cursos_disponibles') {
-		res.render('cursos', {
-			rol: resultado==null ? '' : res.locals.rol_sesion,
-			resultado: resultado,
-			formulario: req.query,
-			cursosInscritos: req.query.action,
-			action:req.query.action,
-			loggeado: (resultado!=null && resultado.estado === 'ok')
-		});
-	}else{
-		if (req.query.action=='cursosinscritos'){
-			if(resultado!=null && resultado.estado === 'ok'){
-				res.render('cursos', {
-					rol: resultado==null ? '' : res.locals.rol_sesion,
-					resultado: resultado,
-					formulario: req.query,
-					cursosInscritos: req.query.action,
-					action:req.query.action,
-					loggeado: (resultado!=null && resultado.estado === 'ok')
-				});
-			}else{
-				res.render('index', {
-					rol: '',
-					loggeado: (resultado!=null && resultado.estado === 'ok')
-				});
-			}
-		}
-		
-	}
-	
+	res.render('cursos', {
+		rol: res.locals.rol_sesion,
+		resultado: resultado,
+		formulario: req.query,
+		cursosInscritos: req.query.action,
+		action:req.query.action
+	});
 });
 
 app.post('/cursos', (req, res) => {
@@ -250,17 +231,9 @@ app.post('/registro', (req, res) => {
 
 app.get('/usuarios', (req, res) => {
 
-	if (resultado!=null && resultado.estado === 'ok') {
-		res.render('adminUsuarios', {
-			rol: res.locals.rol_sesion,
-			loggeado: (resultado!=null && resultado.estado === 'ok')
-		});
-	}else{
-		res.render('index', {
-			rol: '',
-			loggeado: (resultado!=null && resultado.estado === 'ok')
-		});
-	}
+	res.render('adminUsuarios', {
+		rol: res.locals.rol_sesion
+	});
 });
 
 app.post('/usuarios', (req, res) => {
@@ -314,8 +287,11 @@ app.get('/salir', (req, res) => {
 	res.locals.sesion = false;
 	res.locals.rol_sesion = 'interesado';
 	res.locals.nombre_usuario = '';
+	res.locals.doc_sesion = '';
 	req.session.rol = 'interesado';
 	req.session.nombre = '';
+	req.session.doc = '';
+
 	res.render('index', {
 		rol: res.locals.rol_sesion,
 		loggeado: (resultado!=null && resultado.estado === 'ok')

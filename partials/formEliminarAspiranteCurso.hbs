@@ -1,5 +1,5 @@
 <div class="container">
-	{{#ifeq rol "aspirante"}}
+	{{#ifeq rol 'aspirante'}}
 		<form action="/eliminar?action={{formulario.action}}&doc={{formulario.doc}}" method="post">
 			<input type="hidden" name="id_curso" value="{{id}}">
 			<input type="hidden" name="doc_aspirante" value="{{formulario.doc}}">

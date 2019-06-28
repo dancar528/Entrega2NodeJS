@@ -1,5 +1,7 @@
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const UsuarioModel = require('./models/usuario');
+const AspiranteModel = require('./models/aspirante');
 
 const cargarAspirantesCursos = () => {
 	//let aspirantesCursos = null;
@@ -27,6 +29,21 @@ const listarAspirantes = () => {
 const listarUsuarios = () => {
 	let usuarios = require('./usuarios.json');
 	return usuarios;
+};
+
+const listarUsuarioMongoDB = (doc, password, callback) => {
+	let usuario = {};
+	UsuarioModel.findOne({doc: doc}).exec((err, usuario) => {
+		if (err) {
+			callback(null);
+			return;
+		}
+		if (!usuario || !bcrypt.compareSync(password, usuario.password)) {
+			callback(null);
+			return;
+		}
+		callback(usuario);
+	});
 };
 
 const mostrarCursosAspirantes = () => {
@@ -159,10 +176,12 @@ const crearAspirante = (nuevoAspirante) => {
 		delete nuevoAspirante.password;
 		delete nuevoAspirante.doc_trigger;
 		aspirantes.push(nuevoAspirante);
-		guardarAspirantes(aspirantes);
+		//guardarAspirantes(aspirantes);
+		guardarAspiranteMongoDB(nuevoAspirante);
 		let usuarios = listarUsuarios();
 		usuarios.push(usuario);
-		guardarUsuarios(usuarios);
+		guardarUsuarioMongoDB(usuario);
+		//guardarUsuarios(usuarios);
 		resultado['estado'] = 'ok';
 		resultado['msg'] = `Usuario registrado correctamente!. Recuerda ingresar con el documento`;
 		return resultado;
@@ -330,6 +349,35 @@ const guardarAspirantes = (aspirantes) => {
 
 };
 
+const guardarAspiranteMongoDB = (aspirante) => {
+	let nuevoAspirante = new AspiranteModel({
+		doc: aspirante.doc,
+		nombre: aspirante.nombre,
+		correo: aspirante.correo,
+		telefono: aspirante.telefono
+	});
+	nuevoAspirante.save((err, resultado) => {
+		if (err) {
+			return console.log(err);
+		}
+	});
+
+};
+
+const guardarUsuarioMongoDB = (usuario) => {
+	let nuevoUsuario = new UsuarioModel({
+		doc: usuario.doc,
+		password: usuario.password,
+		rol: usuario.rol
+	});
+	nuevoUsuario.save((err, resultado) => {
+		if (err) {
+			return console.log(err);
+		}
+	});
+
+};
+
 const guardarUsuarios = (usuarios) => {
 	let datos = JSON.stringify(usuarios);
 	fs.writeFile('src/usuarios.json', datos, (err) => {
@@ -486,7 +534,7 @@ const actualizarUsuario = (nuevosDatos) => {
 	}
 };
 
-const ingresar = (usuarioAValidar) => {
+const ingresar = (usuarioAValidar, callback) => {
 	let resultado = [];
 	let camposObligatorios = [];
 
@@ -500,25 +548,35 @@ const ingresar = (usuarioAValidar) => {
 		resultado['camposObligatorios'] = camposObligatorios;
 		resultado['estado'] = 'error';
 		resultado['msg'] = 'Favor completar los campos obligatorios';
-		return resultado;
+		//return resultado;
+	callback(resultado);
+	return;
+
 	}
 
-	let usuarios = listarUsuarios();
-	let usuario = usuarios.find(usuario => 
-		usuario.doc == usuarioAValidar.doc
-			&& bcrypt.compareSync(usuarioAValidar.password, usuario.password)
+	//let usuarios = listarUsuarios();
+	listarUsuarioMongoDB(
+		usuarioAValidar.doc,
+		usuarioAValidar.password,
+		(usuario) => {
+			//let usuario = usuarios.find(usuario =>
+			//	usuario.doc == usuarioAValidar.doc
+			//		&& bcrypt.compareSync(usuarioAValidar.password, usuario.password)
+			//);
+			if (usuario == null) {
+				resultado['estado'] = 'error';
+				resultado['rol'] = '';
+				resultado['msg'] = 'No existe usuario con la información ingresada';
+				callback(resultado);
+				return;
+
+			}
+			resultado['estado'] = 'ok';
+			resultado['rol'] = usuario.rol;
+			resultado['msg'] = 'ok';
+			callback(resultado);
+		}
 	);
-
-	if (!usuario) {
-		resultado['estado'] = 'error';
-		resultado['rol'] = '';
-		resultado['msg'] = 'No existe usuario con la información ingresada';
-		return resultado;
-	}
-	resultado['estado'] = 'ok';
-	resultado['rol'] = usuario.rol;
-	resultado['msg'] = 'ok';
-	return resultado;
 };
 
 const listarDocentes = () => {
@@ -536,11 +594,17 @@ const listarDocentes = () => {
 	return docentes;
 };
 
-const consultarAspirante = (doc) => {
+const consultarAspirante = (doc, callback) => {
 	let aspirante = {};
-	aspirante = listarAspirantes().find((aspirante) => aspirante.doc === doc);
-
-	return aspirante;
+	//aspirante = listarAspirantes().find((aspirante) => aspirante.doc === doc);
+	AspiranteModel.findOne({doc: doc}).exec((err, aspirante) => {
+		if (err) {
+			console.log(err);
+			callback(null);
+			return;
+		}
+		callback(aspirante);
+	});
 };
 
 module.exports = {

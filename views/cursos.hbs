@@ -1,5 +1,5 @@
 {{>header}}
-{{#ifeq rol 'coordinador'}}
+{{#ifeq rol_sesion 'coordinador'}}
 	{{>formCrearCurso}}
 {{/ifeq}}
 {{#if (alertaValidarCampos resultado.boton 'remover')}}
@@ -24,7 +24,7 @@
 {{/if}}
 <div class="container">
 	<div class="accordion" id="accordionExample">
-		{{#each (mostrarCursos rol formulario.doc formulario.action)}}
+		{{#each (mostrarCursos rol_sesion formulario.doc formulario.action)}}
 			<div class="card">
 		    <div class="card-header" id="heading{{@index}}">
 			    <h4 class="mb-0">
@@ -36,7 +36,7 @@
 			    <table class="table table-bordered table-sm">
 					<thead class="thead-dark">
 						<tr>
-							{{#ifeq ../rol 'coordinador'}}
+							{{#ifeq ../rol_sesion 'coordinador'}}
 								<th scope="col">Estado</th>
 								<th scope="col">ID</th>
 								<th scope="col">Docente</th>
@@ -48,7 +48,7 @@
 					</thead>
 					<tbody>
 						<tr>
-							{{#ifeq ../rol 'coordinador'}}
+							{{#ifeq ../rol_sesion 'coordinador'}}
 								<td scope="col">{{estado}}</td>
 								<td scope="col">{{id}}</td>
 								<td scope="col">{{docente}}</td>
@@ -81,11 +81,11 @@
 						</tbody>
 					</table>
 		        </div>
-				{{#ifnoteq ../rol ""}} 
-					{{#if (permitirInscribir ../rol ../action)}}
-						{{>formCrearAspiranteCurso rol=../rol resultado=../resultado formulario=../formulario}}
+				{{#ifnoteq ../rol_sesion ""}} 
+					{{#if (permitirInscribir ../rol_sesion ../action)}}
+						{{>formCrearAspiranteCurso rol=../rol_sesion resultado=../resultado formulario=../formulario}}
 					{{else}}
-						{{>formEliminarAspiranteCurso rol=../rol resultado=../resultado formulario=../formulario}}
+						{{>formEliminarAspiranteCurso rol=../rol_sesion resultado=../resultado formulario=../formulario}}
 					{{/if}}
 				{{/ifnoteq}}
 	        	{{#if (mostrarFormAlInscribir ../resultado.id_curso id)}}
@@ -102,12 +102,12 @@
 						</div>
 					{{/if}}
 				{{/if}}
-		        {{#ifeq ../rol 'coordinador'}}
-			        {{>actualizarCurso rol=../rol resultado=../resultado formulario=../formulario}}	
+		        {{#ifeq ../rol_sesion 'coordinador'}}
+			        {{>actualizarCurso rol=../rol_sesion resultado=../resultado formulario=../formulario}}	
 		        {{/ifeq}}
-		        {{#if (listarAspirantesXCursos ../rol)}}
+		        {{#if (listarAspirantesXCursos ../rol_sesion)}}
 			        {{#if (mostrarAspirantesXCurso id)}}
-			        	{{>listarAspirantesCurso rol=../rol id=id}}
+			        	{{>listarAspirantesCurso rol=../rol_sesion id=id}}
 		        	{{/if}}
 	        	{{/if}}
 		      </div>

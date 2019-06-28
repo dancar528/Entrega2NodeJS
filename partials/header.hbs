@@ -26,13 +26,13 @@
 		           	{{/if}}
 	                {{#ifnoteq rol_sesion 'docente'}}
 		                <li class="nav-item">
-		                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{formulario.doc}}&action=cursos_disponibles">Cursos Disponibles</a>
+		                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{doc_sesion}}&action=cursos_disponibles">Cursos Disponibles</a>
 		                </li>
 	                {{/ifnoteq}}
 	                {{#if sesion}}
 		                {{#ifeq rol_sesion 'aspirante'}}
 			                <li class="nav-item">
-			                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{formulario.doc}}&action=cursosinscritos">Mis Cursos</a>
+			                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{doc_sesion}}&action=cursosinscritos">Mis Cursos</a>
 			                </li>
 		                {{/ifeq}}
 	                {{/if}}
@@ -46,7 +46,7 @@
 	                {{#if sesion}}
 		                {{#ifeq rol_sesion 'docente'}}
 		                  <li class="nav-item">
-			                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{formulario.doc}}&action=cursosinscritos">Cursos Asignados</a>
+			                  <a class="nav-link" href="/cursos?rol={{rol_sesion}}&doc={{doc_sesion}}&action=cursosinscritos">Cursos Asignados</a>
 			              </li>
 		                {{/ifeq}}
 	                {{/if}}

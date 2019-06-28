@@ -1,7 +1,7 @@
 {{>header}}
 <div class="container">
 	<div class="accordion" id="accordionExample">
-		{{#each (mostrarUsuarios rol)}}
+		{{#each (mostrarUsuarios rol_sesion)}}
 			<div class="card">
 			    <div class="card-header" id="heading{{@index}}">
 				    <h4 class="mb-0">
@@ -33,7 +33,7 @@
 			    </div>
 			    <div id="collapse{{@index}}" class="collapse {{mostrarFormAlInscribir ../resultado.doc_trigger doc}}" aria-labelledby="heading{{@index}}" data-parent="#accordionExample">
 			      	<div class="card-body">
-			      		{{>formUsuario action='usuarios' formulario=this boton='actualizar' resultado=../resultado doc=doc rol=../rol}}
+			      		{{>formUsuario action='usuarios' formulario=this boton='actualizar' resultado=../resultado doc=doc rol=../rol_sesion}}
 			    	</div>
 			    </div>
 			</div>
