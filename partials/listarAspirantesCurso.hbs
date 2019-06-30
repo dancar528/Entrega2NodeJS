@@ -8,7 +8,7 @@
 			<th scope="col"></th>
 		</thead>
 		<tbody>
-			{{#each (mostrarAspirantesXCurso id)}}
+			{{#each (listarAspirantesPorCurso lista id)}}
 				<tr>
 					<form action="/eliminar" method="post">
 						<input type="hidden" name="id_curso" value="{{../id}}">

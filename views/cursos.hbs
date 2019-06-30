@@ -1,10 +1,7 @@
 {{>header}}
-{{#ifeq rol_sesion 'coordinador'}}
-	{{>formCrearCurso}}
-{{/ifeq}}
 {{#if (alertaValidarCampos resultado.boton 'remover')}}
 	<div class="row">
-		<div class="bs-component" align="center" style="margin-left: 92px">
+		<div class="bs-component" align="center" style="margin-left: 150px">
 			<div class="alert alert-dismissible alert-{{mostrarAlerta resultado}}">
 				<button type="button" class="close" data-dismiss="alert">×</button>
 				<strong>{{resultado.estado}}!</strong> {{resultado.msg}}
@@ -12,9 +9,22 @@
 		</div>
 	</div>
 {{/if}}
+{{#if (alertaValidarCampos resultado.boton 'actualizar')}}
+	<div class="row">
+		<div class="bs-component" align="center" style="margin-left: 150px">
+			<div class="alert alert-dismissible alert-{{mostrarAlerta resultado}}">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>{{resultado.estado}}!</strong> {{resultado.msg}}
+			</div>
+		</div>
+	</div>
+{{/if}}
+{{#ifeq rol_sesion 'coordinador'}}
+	{{>formCrearCurso}}
+{{/ifeq}}
 {{#if (alertaValidarCampos resultado.boton 'inscribirAspCurso')}}
 	<div class="row">
-		<div class="bs-component" align="center" style="margin-left: 92px">
+		<div class="bs-component" align="center" style="margin-left: 150px">
 			<div class="alert alert-dismissible alert-{{mostrarAlerta resultado}}">
 				<button type="button" class="close" data-dismiss="alert">×</button>
 				<strong>{{resultado.estado}}!</strong> {{resultado.msg}}
@@ -83,32 +93,16 @@
 		        </div>
 				{{#ifnoteq ../rol_sesion ""}} 
 					{{#if (permitirInscribir ../rol_sesion ../action)}}
-						{{>formCrearAspiranteCurso rol=../rol_sesion resultado=../resultado formulario=../formulario}}
+						{{>formCrearAspiranteCurso rol=../rol_sesion resultado=../resultado formulario=../formulario id_curso=id}}
 					{{else}}
-						{{>formEliminarAspiranteCurso rol=../rol_sesion resultado=../resultado formulario=../formulario}}
+						{{>formEliminarAspiranteCurso rol=../rol_sesion resultado=../resultado formulario=../formulario id_curso=id}}
 					{{/if}}
 				{{/ifnoteq}}
-	        	{{#if (mostrarFormAlInscribir ../resultado.id_curso id)}}
-	        		{{#if (alertaValidarCampos ../resultado.boton 'actualizar')}}
-		        		<div class="container">
-			        		<div class="row">
-								<div class="bs-component">
-									<div class="alert alert-dismissible alert-{{mostrarAlerta ../resultado}}">
-										<button type="button" class="close" data-dismiss="alert">×</button>
-										<strong>{{../resultado.estado}}!</strong> {{../resultado.msg}}
-									</div>
-								</div>
-							</div>
-						</div>
-					{{/if}}
-				{{/if}}
 		        {{#ifeq ../rol_sesion 'coordinador'}}
-			        {{>actualizarCurso rol=../rol_sesion resultado=../resultado formulario=../formulario}}	
+			        {{>actualizarCurso rol=../rol_sesion resultado=../resultado formulario=../formulario id_curso=id docentes=../docentes}}	
 		        {{/ifeq}}
 		        {{#if (listarAspirantesXCursos ../rol_sesion)}}
-			        {{#if (mostrarAspirantesXCurso id)}}
-			        	{{>listarAspirantesCurso rol=../rol_sesion id=id}}
-		        	{{/if}}
+			        {{>listarAspirantesCurso rol=../rol_sesion id=id id_curso=id lista=../resultlist}}
 	        	{{/if}}
 		      </div>
 		    </div>

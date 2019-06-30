@@ -2,7 +2,7 @@
 	<form action="/actualizar" method="post">
 		<div class="row">
 			<div class="form-group col">
-				<input type="hidden" name="id_curso" value="{{id}}">
+				<input type="hidden" name="id_curso" value="{{id_curso}}">
 				<label><strong>Cambiar estado del curso?</strong></label>
 				<select name="estado" class="form-control {{#if (mostrarFormAlInscribir formulario.id_curso id)}}{{validarCampos resultado formulario 'estado' 'is-invalid' 'actualizar'}}{{/if}}" id="estado" value="{{formulario.estado}}">
 					<option value="">Seleccione el nuevo estado...</option>
@@ -17,7 +17,7 @@
 				<label for="docente"><strong>Asignar docente</strong></label>
 				<select name="docente" class="form-control" id="docente" value="{{formulario.docente}}">
 					<option value="">Seleccione el docente...</option>
-					{{#each (listarDocentes)}}
+					{{#each docentes}}
 						<option value="{{doc}}">{{nombre}}</option>
 					{{/each}}
 				</select>

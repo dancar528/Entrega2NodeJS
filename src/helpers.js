@@ -2,9 +2,13 @@ const hbs = require('hbs');
 const {
 	mostrarCursos,
 	mostrarAspirantesXCurso,
+	mostrarAspirantesXCursoLista,
 	mostrarUsuarios,
-	listarDocentes
+	listarDocentes,
+	mostrarCursosLista
 } = require('./funciones');
+
+const deasync = require('deasync');
 
 hbs.registerHelper('listar', (tipo) => {
 	let elementos = listar(tipo);
@@ -12,13 +16,20 @@ hbs.registerHelper('listar', (tipo) => {
 });
 
 hbs.registerHelper('listarAspirantesXCursos', (rol) => {
-	if (rol === 'coordinador' || rol === 'docente') return true;
+	if (rol == 'coordinador' || rol == 'docente') return true;
 	return false;
 });
 
 hbs.registerHelper('mostrarCursos', (rol, doc, action) => {
-	let cursos = mostrarCursos(rol, doc, action);
-	return cursos;
+	let resultado;
+	mostrarCursosLista(rol, doc, action).then(function(result){
+		resultado = result;
+	});
+
+	while(resultado === undefined) {
+		deasync.runLoopOnce();
+	}
+	return resultado;
 });
 
 hbs.registerHelper('validarCampos', (resultado, formulario, campo, claseCss, tipoForm) => {
@@ -38,9 +49,9 @@ hbs.registerHelper('alertaValidarCampos', (boton, tipoForm) => {
 });
 
 hbs.registerHelper('mostrarAlerta', (resultado) => {
-	if (resultado && resultado['estado'] === 'error') {
+	if (resultado && resultado['estado'] == 'error') {
 		return 'danger';
-	} else if (resultado && resultado['estado'] === 'ok') {
+	} else if (resultado && resultado['estado'] == 'ok') {
 		return 'success';
 	}
 	return '';
@@ -55,25 +66,48 @@ hbs.registerHelper('permitirInscribir', (rol,action) => {
 
 hbs.registerHelper('mostrarFormAlInscribir', (inscribirIdCurso, actualIdCurso) => {
 
-	if (inscribirIdCurso === actualIdCurso) {
+	if (inscribirIdCurso == actualIdCurso) {
 		return ' show';
 	}
 	return '';
 });
 
 hbs.registerHelper('mostrarAspirantesXCurso', (idCurso) => {
+	let cursosAspirantes;
 
-	let cursosAspirantes = mostrarAspirantesXCurso(idCurso);
+	return [];
+});
 
-	return cursosAspirantes;
+hbs.registerHelper('listarAspirantesPorCurso', (lista,idCurso) => {
+	let aspirantes = lista.aspirantes;
+	let aspirantecursos = lista.aspirantescursos;
+	let curso = aspirantecursos.filter(aspiranteCurso => aspiranteCurso.id_curso === idCurso);
+
+	let resultado = []
+	curso.forEach((aspiranteCurso, indice) => {
+		let aspirante1 = aspirantes.find(aspirante => aspirante.doc == aspiranteCurso.doc_aspirante)
+		resultado.push(aspirante1);
+	});
+	return resultado;
+});
+
+hbs.registerHelper("setVar", function(varName, varValue, options) {
+	options.data.root[varName] = varValue;
 });
 
 hbs.registerHelper('mostrarUsuarios', (rol) => {
-	let usuarios = [];
+	let usuarios;
 	if (rol == 'coordinador') {
-		usuarios = mostrarUsuarios();
-	}
+		mostrarUsuarios().then(function(result){
+			usuarios = result;
+		});
 
+		while(usuarios === undefined) {
+			deasync.runLoopOnce();
+		}
+		return usuarios;
+	}
+	usuarios=[];
 	return usuarios;
 });
 

@@ -2,33 +2,76 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const UsuarioModel = require('./models/usuario');
 const AspiranteModel = require('./models/aspirante');
+const CursoModel = require('./models/curso');
+const AspiranteCursoModel = require('./models/aspirantecurso');
 
-const cargarAspirantesCursos = () => {
-	//let aspirantesCursos = null;
-	//aspirantesCursos = require('./aspirantes_cursos.json');
-	//return aspirantesCursos;
-	try{
-		let jsonData = JSON.parse(fs.readFileSync('src/aspirantes_cursos.json', 'utf-8'));
-		return jsonData;
-	}catch(error){
-		return [];
-	}
+const cargarAspirantesCursos = async () => {
+	return new Promise(function(resolve, reject) {
+		AspiranteCursoModel.find({}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(result);
+		});
+	});
+};
+
+const cargarAspirantesCursosPorIdCurso = async(idCurso) => {
+	AspiranteCursoModel.find({id_curso:idCurso}).exec((error,result)=>{
+		if(error)//return [];
+			throw error;
+
+		return result;
+	});
+};
+
+const listarCursos = async () => {
+	return new Promise(function(resolve, reject) {
+		CursoModel.find({}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(result);
+		});
+	});
+
+};
+
+const listarAspirantes = async () => {
+
+	return new Promise(function(resolve, reject) {
+		AspiranteModel.find({}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+			
+			resolve(result);
+		});
+	});
 	
 };
 
-const listarCursos = () => {
-	let cursos = require('./cursos.json');
-	return cursos;
+const listarAspirantesLista = async() =>{
+	return new Promise(function(resolve, reject) {
+	AspiranteModel.find({}).exec((error,result)=>{
+		if(error){//return [];
+			throw error;
+		}
+		
+		resolve(result);
+	});
+	});
 };
 
-const listarAspirantes = () => {
-	let aspirantes = require('./aspirantes.json');
-	return aspirantes;
-};
+const listarUsuarios = async () => {
 
-const listarUsuarios = () => {
-	let usuarios = require('./usuarios.json');
-	return usuarios;
+	return new Promise(function(resolve, reject) {
+		UsuarioModel.find({}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+		
+			resolve(result);
+		});
+	});
 };
 
 const listarUsuarioMongoDB = (doc, password, callback) => {
@@ -46,37 +89,19 @@ const listarUsuarioMongoDB = (doc, password, callback) => {
 	});
 };
 
-const mostrarCursosAspirantes = () => {
-	let cursos = listarCursos();
-	let aspirantesCursos = cargarAspirantesCursos();
+const mostrarAspirantesXCurso = async () => {
+	let resultado = [];
+	let aspirantesCursos =  await cargarAspirantesCursos();
 
-	cursos.forEach((curso, indice) => {
-		let aspirantesCurso = aspirantesCursos.filter(
-			aspiranteCurso => aspiranteCurso.id_curso == curso.id
-		);
-		cursos[indice].aspirantes = aspirantesCurso;
-	});
+	let aspirantes = await listarAspirantesLista();
 
-	return cursos;
+	resultado['aspirantes']=aspirantes;
+	resultado['aspirantescursos']=aspirantesCursos;
+	//console.log(resultado);
+	return resultado;
 };
 
-const mostrarAspirantesXCurso = (idCurso) => {
-
-	let aspirantesCursos = cargarAspirantesCursos();
-	let aspirantesCurso = aspirantesCursos.filter(aspiranteCurso => aspiranteCurso.id_curso === idCurso);
-	let aspirantes = listarAspirantes();
-	let aspirantesInfoCompleta = [];
-
-	aspirantesCurso.forEach((aspiranteCurso, indice) => {
-		aspirantesInfoCompleta.push(
-			aspirantes.find(aspirante => aspirante.doc === aspiranteCurso.doc_aspirante)
-		);
-	});
-
-	return aspirantesInfoCompleta;
-};
-
-const crearCurso = (nuevoCurso) => {
+const crearCurso = async(nuevoCurso) => {
 
 	let resultado = [];
 	let camposObligatorios = [];
@@ -102,7 +127,7 @@ const crearCurso = (nuevoCurso) => {
 		return resultado;
 	}
 
-	let cursos = listarCursos();
+	let cursos = await listarCursos();
 	let curso = cursos.find(curso => curso.id == nuevoCurso.id);
 
 	if (typeof curso !== 'undefined'){
@@ -112,19 +137,23 @@ const crearCurso = (nuevoCurso) => {
 		resultado['msg'] = `El curso con codigo ${curso.id} ya existe`;
 		return resultado;
 	} else {
-		nuevoCurso.estado = (nuevoCurso.estado) ? nuevoCurso.estado : 'Disponible';
-		delete nuevoCurso.boton;
-		cursos.push(nuevoCurso);
-
-		guardarCursos(cursos);
-		resultado['estado'] = 'ok';
+		nuevoCurso.estado = 'Disponible';
+		nuevoCurso.docente = 'Sin definir docente';
+		let cursoGuardado = await guardarCursos(nuevoCurso);
 		resultado['boton'] = 'crear';
-		resultado['msg'] = `Curso con codigo ${nuevoCurso.id} creado correctamente`;
+		if(cursoGuardado){
+			resultado['estado'] = 'ok';
+			resultado['msg'] = `Curso con codigo ${nuevoCurso.id} creado correctamente`;
+		}else{
+			resultado['estado'] = 'error';
+			resultado['boton'] = 'crear';
+			resultado['msg'] = `No se pudo crear el curso con id ${nuevoCurso.id}`;
+		}
 		return resultado;
 	}
 };
 
-const crearAspirante = (nuevoAspirante) => {
+const crearAspirante = async (nuevoAspirante) => {
 
 	let resultado = [];
 	let camposObligatorios = [];
@@ -154,9 +183,12 @@ const crearAspirante = (nuevoAspirante) => {
 		return resultado;
 	}
 
-	let aspirantes = listarAspirantes();
-	let aspirante = aspirantes.find(aspirante => aspirante.doc == nuevoAspirante.doc);
+	let aspirantes = await listarAspirantes();
+	let aspirante = false;
 
+	if(typeof aspirantes!=='undefined'){
+		aspirante= aspirantes.find(aspirante => aspirante.doc == nuevoAspirante.doc);
+	}
 	if (aspirante) {
 		resultado['estado'] = 'error';
 		resultado['boton'] = nuevoAspirante.boton;
@@ -172,27 +204,21 @@ const crearAspirante = (nuevoAspirante) => {
 		};
 		resultado['boton'] = nuevoAspirante.boton;
 		resultado['rol'] = defaultRol;
-		delete nuevoAspirante.boton;
-		delete nuevoAspirante.password;
-		delete nuevoAspirante.doc_trigger;
-		aspirantes.push(nuevoAspirante);
-		//guardarAspirantes(aspirantes);
+
 		guardarAspiranteMongoDB(nuevoAspirante);
-		let usuarios = listarUsuarios();
-		usuarios.push(usuario);
+	
 		guardarUsuarioMongoDB(usuario);
-		//guardarUsuarios(usuarios);
+	
 		resultado['estado'] = 'ok';
 		resultado['msg'] = `Usuario registrado correctamente!. Recuerda ingresar con el documento`;
 		return resultado;
 	}
 };
 
-const crearAspiranteCurso = (nuevoAspiranteCurso) => {
+const crearAspiranteCurso = async (nuevoAspiranteCurso) => {
 
 	let resultado = [];
 	let camposObligatorios = [];
-
 	if (!nuevoAspiranteCurso.doc_aspirante) {
 		camposObligatorios.push('doc_aspirante');
 	} 
@@ -211,12 +237,16 @@ const crearAspiranteCurso = (nuevoAspiranteCurso) => {
 		return resultado;
 	}
 
-	let cursosAspirantes = cargarAspirantesCursos();
-	let cursoAspirante = cursosAspirantes.find(
-		(cursoAspirante) => cursoAspirante.doc_aspirante === nuevoAspiranteCurso.doc_aspirante
-			&& cursoAspirante.id_curso === nuevoAspiranteCurso.id_curso
-	);
-	if (cursoAspirante) {
+	let cursosAspirantes = await cargarAspirantesCursos();
+	let cursoAspirante=null;
+	if(typeof cursosAspirantes!=='undefined'){
+			cursoAspirante = cursosAspirantes.find(
+				(cursoAspirante) => cursoAspirante.doc_aspirante == nuevoAspiranteCurso.doc_aspirante
+					&& cursoAspirante.id_curso == nuevoAspiranteCurso.id_curso
+			);
+	}
+
+	if (typeof cursoAspirante!=='undefined') {
 		resultado['estado'] = 'error';
 		resultado['id_curso'] = cursoAspirante.id_curso;
 		resultado['action'] = nuevoAspiranteCurso.action;
@@ -227,21 +257,25 @@ const crearAspiranteCurso = (nuevoAspiranteCurso) => {
 	}
 	resultado['action'] = nuevoAspiranteCurso.action;
 	resultado['boton'] = nuevoAspiranteCurso.boton;
-	delete nuevoAspiranteCurso.action;
-	delete nuevoAspiranteCurso.boton;
 
-	cursosAspirantes.push(nuevoAspiranteCurso);
-	guardarAspirantesCursos(cursosAspirantes);
-	resultado['estado'] = 'ok';
+	let aspiranteCursoGuardado = await guardarAspirantesCursos(nuevoAspiranteCurso);
+
 	resultado['doc_aspirante'] = nuevoAspiranteCurso.doc_aspirante;
 	resultado['id_curso'] = nuevoAspiranteCurso.id_curso;
-	resultado['msg'] = `Inscripcion exitosa en el curso ${nuevoAspiranteCurso.id_curso}`;
+	if(aspiranteCursoGuardado){
+		resultado['estado'] = 'ok';
+		resultado['msg'] = `Inscripcion exitosa en el curso ${nuevoAspiranteCurso.id_curso}`;
+	}else{
+		resultado['estado'] = 'error';
+		resultado['msg'] = `No se pudo inscribir el aspirante al curso ${nuevoAspiranteCurso.id_curso}`;
+	}
 	return resultado;
 };
 
-const actualizarEstadoCurso = (idCurso, nuevoEstado, docente) => {
+const actualizarEstadoCurso = async(idCurso, nuevoEstado, docente) => {
 	let resultado = [];
 	let camposObligatorios = [];
+	
 	if (!idCurso) {
 		camposObligatorios.push('id');
 	}
@@ -259,8 +293,11 @@ const actualizarEstadoCurso = (idCurso, nuevoEstado, docente) => {
 		return resultado;
 	}
 
-	let cursos = listarCursos();
-	let cursoIndice = cursos.findIndex(curso => curso.id == idCurso);
+	let cursos = await listarCursos();
+	let cursoIndice=-1;
+	if(typeof cursos!=='undefined'){
+		cursoIndice = cursos.findIndex(curso => curso.id == idCurso);
+	}
 
 	if (cursoIndice < 0){
 		resultado['estado'] = 'error';
@@ -270,16 +307,42 @@ const actualizarEstadoCurso = (idCurso, nuevoEstado, docente) => {
 			Por tanto no se realiza ninguna actualizacion`;
 		return resultado;
 	} else {
-		cursos[cursoIndice].estado = nuevoEstado; 
-		cursos[cursoIndice].docente = docente;
-		guardarCursos(cursos);
-		resultado['estado'] = 'ok';
-		resultado['boton'] = 'actualizar';
-		resultado['id_curso'] = idCurso;
-		resultado['msg'] = `Curso con codigo ${idCurso} actualizado correctamente`;
+		cursos[cursoIndice].estado = nuevoEstado ? nuevoEstado : 'Disponible'; 
+		cursos[cursoIndice].docente = docente ? docente : 'Sin docente asignado';
+
+		let nuevoCurso = cursos[cursoIndice];
+
+		let cursoActualizado = await actualizarCursoMongo(nuevoCurso);
+		
+		if(cursoActualizado){
+			resultado['estado'] = 'ok';
+			resultado['boton'] = 'actualizar';
+			resultado['id_curso'] = idCurso;
+			resultado['msg'] = `Curso con codigo ${idCurso} actualizado correctamente`;
+		}else{
+			resultado['estado'] = 'error';
+			resultado['boton'] = 'actualizar';
+			resultado['id_curso'] = idCurso;
+			resultado['msg'] = `No se pudo actualizar el curso con id ${idCurso}`;
+		}
 		return resultado;
 	}
 };
+
+const actualizarCursoMongo = async (curso) =>{
+	return new Promise(function(resolve, reject) {
+		CursoModel.findOneAndUpdate({id:curso.id},
+			{$set:{
+				estado:curso.estado,
+				docente:curso.docente
+			}},(error,result)=>{
+			if(error)//return false;
+				throw error;
+	
+			resolve(true);	
+		});
+	});
+}
 
 const actualizarCurso = (cursoAModificar) => {
 
@@ -297,8 +360,13 @@ const actualizarCurso = (cursoAModificar) => {
 		return resultado;
 	}
 
-	let cursos = listarCursos();
-	let curso = cursos.find(curso => curso.id == cursoAModificar.id);
+	let cursos =  listarCursos();
+
+	let curso;
+
+	if (typeof cursos !== 'undefined'){
+		 curso = cursos.find(curso => curso.id == cursoAModificar.id);
+	}
 
 	if (typeof curso === 'undefined'){
 		resultado['estado'] = 'error';
@@ -326,25 +394,51 @@ const actualizarCurso = (cursoAModificar) => {
 		if (cursoAModificar.estado) {
 			curso.estado = cursoAModificar.estado;
 		}
-		guardarCursos(cursos);
-		resultado['estado'] = 'ok';
-		resultado['msg'] = `Curso con codigo ${curso.id} actualizado correctamente`;
+		let cursoGuardado =  guardarCursos(curso);
+		if(cursoGuardado){
+			resultado['estado'] = 'ok';
+			resultado['msg'] = `Curso con codigo ${curso.id} actualizado correctamente`;
+		}else{
+			resultado['estado'] = 'error';
+			resultado['msg'] = `No se pudo guardar el curso con id  ${curso.id}`;
+		}
 		return resultado;
 	}
 };
 
-const guardarCursos = (cursos) => {
-	let datos = JSON.stringify(cursos);
-	fs.writeFile('src/cursos.json', datos, (err) => {
-		if (err) throw (err);
+const guardarCursos = async (cursos) => {
+	// let datos = JSON.stringify(cursos);
+	// fs.writeFile('src/cursos.json', datos, (err) => {
+	// 	if (err) throw (err);
+	// });
+
+	let nuevoCurso = new CursoModel({
+		id:cursos.id,
+		nombre:cursos.nombre,
+		descripcion:cursos.descripcion,
+		valor:cursos.valor,
+		modalidad:cursos.modalidad,
+		intensidad:cursos.intensidad,
+		estado:cursos.estado,
+		docente:cursos.docente
 	});
+
+
+	return new Promise(function(resolve, reject) {
+		nuevoCurso.save((error,result)=>{
+			if(error)//return false;
+				throw error;
+			
+			resolve(true);
+		});
+	});
+	
 };
 
 const guardarAspirantes = (aspirantes) => {
 	let datos = JSON.stringify(aspirantes);
 	fs.writeFile('src/aspirantes.json', datos, (err) => {
 		if (err) throw (err);
-		//console.log('Se ha creado el archivo');
 	});
 
 };
@@ -356,6 +450,7 @@ const guardarAspiranteMongoDB = (aspirante) => {
 		correo: aspirante.correo,
 		telefono: aspirante.telefono
 	});
+	
 	nuevoAspirante.save((err, resultado) => {
 		if (err) {
 			return console.log(err);
@@ -382,21 +477,33 @@ const guardarUsuarios = (usuarios) => {
 	let datos = JSON.stringify(usuarios);
 	fs.writeFile('src/usuarios.json', datos, (err) => {
 		if (err) throw (err);
-		//console.log('Se ha creado el archivo');
 	});
 	
 
 };
 
-const guardarAspirantesCursos = (aspirantesCursos) => {
-	let datos = JSON.stringify(aspirantesCursos);
-	fs.writeFileSync('src/aspirantes_cursos.json', datos,'utf8');
+const guardarAspirantesCursos = async (aspirantesCursos) => {
+	// let datos = JSON.stringify(aspirantesCursos);
+	// fs.writeFileSync('src/aspirantes_cursos.json', datos,'utf8');
+
+	let nuevoAspiranteCurso = new AspiranteCursoModel({
+		id_curso:aspirantesCursos.id_curso,
+		doc_aspirante:aspirantesCursos.doc_aspirante
+	});
+	return new Promise(function(resolve, reject) {
+		nuevoAspiranteCurso.save((error,result)=>{
+			if(error)//return false;
+				throw error;
+
+			resolve(true);
+		});
+	});
 };
 
-const mostrarUsuarios = () => {
+const mostrarUsuarios = async () => {
 
-	let aspirantes = listarAspirantes();
-	let usuarios = listarUsuarios();
+	let aspirantes = await listarAspirantes();
+	let usuarios = await listarUsuarios();
 
 	aspirantes.forEach((aspirante, indice) => {
 		let usuario = usuarios.find((usuario) => usuario.doc == aspirante.doc);
@@ -409,54 +516,76 @@ const mostrarUsuarios = () => {
 	return aspirantes;
 };
 
-const mostrarCursos = (rol, doc, action) => {
-	let cursos = listarCursos();
+const mostrarCursos = async (rol, doc, action) => {
+	let cursos =  await listarCursos();
 	// filtrar cursos a mostrar por rol, el rol corrdinador puede
 	// ver todos los cursos incluso en estado cerrado
 	if (!rol || action == 'cursos_disponibles') {
-		cursos = cursos.filter(
-			curso => curso.estado == 'Disponible'
-		);
+
+		if(typeof cursos!=='undefined'){
+			cursos = cursos.filter(
+				curso => curso.estado == 'Disponible'
+			);
+		}
 		return cursos;
 	} else if (rol == 'aspirante') {
 		let nuevoCursos = [];
-		let aspirantesCursos = cargarAspirantesCursos();
-		let aspiranteCursos = aspirantesCursos.filter(
-			aspiranteCurso => aspiranteCurso.doc_aspirante == doc
-		);
-		aspiranteCursos.forEach((aspiranteCurso, indice) => {
-			let curso = cursos.find(
-				curso => curso.id == aspiranteCurso.id_curso
+		let aspirantesCursos = await cargarAspirantesCursos();
+		let aspiranteCursos;
+		if(typeof cursos!=='undefined'){
+			aspiranteCursos = aspirantesCursos.filter(
+				aspiranteCurso => aspiranteCurso.doc_aspirante == doc
 			);
-			if (typeof curso!=='undefined') {
-				nuevoCursos.push(curso);
-			}
-		});
+			aspiranteCursos.forEach((aspiranteCurso, indice) => {
+				let curso = cursos.find(
+					curso => curso.id == aspiranteCurso.id_curso
+				);
+				if (typeof curso!=='undefined') {
+					nuevoCursos.push(curso);
+				}
+			});
+		}
 		return nuevoCursos;
 	} else if (rol == 'docente') {
 		let nuevoCursos = [];
-		nuevoCursos = cursos.filter(
-			curso => curso.docente == doc
-		);
+		if(typeof cursos!=='undefined'){
+			nuevoCursos = cursos.filter(
+				curso => curso.docente == doc
+			);
+		}
 		return nuevoCursos;
 	}
 	return cursos;
 };
 
-const eliminarAspiranteCurso = (docAspirante, idCurso) => {
+const eliminarAspiranteCurso = async(docAspirante, idCurso) => {
 
-	let aspirantesCursos = cargarAspirantesCursos();
+	let aspirantesCursos = await cargarAspirantesCursos();
 	let resultado = [];
-	let aspiranteCursoEliminado = aspirantesCursos.filter(
-		lista => lista.doc_aspirante!=docAspirante || lista.id_curso!=idCurso);
+	let aspiranteCursoEliminado=null;
+	if(typeof aspirantesCursos!=='undefined'){
+		aspiranteCursoEliminado = aspirantesCursos.filter(
+			lista => lista.doc_aspirante!=docAspirante || lista.id_curso!=idCurso);
+	}
 
 	if (aspiranteCursoEliminado!=null) {
-		resultado['estado'] = 'ok';
-		resultado['id_curso'] = idCurso;
-		resultado['boton'] = 'remover';
-		resultado['msg'] = `El aspirante con documento ${docAspirante} se elimino correctamente
-			del curso con codigo ${idCurso}`;
-		guardarAspirantesCursos(aspiranteCursoEliminado);
+
+		//guardarAspirantesCursos(aspiranteCursoEliminado);
+		let aspiranteCursoEliminado = await eliminarAspiranteCursoMongoDB(docAspirante,idCurso);
+
+		if(aspiranteCursoEliminado){
+			resultado['estado'] = 'ok';
+			resultado['id_curso'] = idCurso;
+			resultado['boton'] = 'remover';
+			resultado['msg'] = `El aspirante con documento ${docAspirante} se elimino correctamente
+				del curso con codigo ${idCurso}`;
+		}else{
+			resultado['estado'] = 'error';
+			resultado['id_curso'] = idCurso;
+			resultado['boton'] = 'remover';
+			resultado['msg'] = `En este momento no es posible eliminar al aspirante con documento 
+				${docAspirante} del curso con codigo ${idCurso}. Por favor intente mas tarde`;
+		}
 		return resultado;
 	} else {
 		resultado['estado'] = 'error';
@@ -468,7 +597,18 @@ const eliminarAspiranteCurso = (docAspirante, idCurso) => {
 	}
 };
 
-const actualizarUsuario = (nuevosDatos) => {
+const eliminarAspiranteCursoMongoDB = async (docAspirante,idCurso) => {
+	return new Promise(function(resolve, reject) {
+		AspiranteCursoModel.findOneAndDelete({doc_aspirante:docAspirante,id_curso:idCurso},(error,result) =>{
+			if(error)
+				throw error;
+			
+			resolve(true);
+		});
+	});	
+};
+
+const actualizarUsuario = async (nuevosDatos) => {
 	nuevosDatos.doc = nuevosDatos.doc_trigger;
 
 	if (nuevosDatos[`rol${nuevosDatos.doc}`]) {
@@ -501,37 +641,35 @@ const actualizarUsuario = (nuevosDatos) => {
 		return resultado;
 	}
 
-	let usuarios = listarUsuarios();	
-	let usuarioIndice = usuarios.findIndex(usuario => usuario.doc === nuevosDatos.doc);
-	let aspirantes = listarAspirantes();
-	let aspiranteIndice = aspirantes.findIndex(aspirante => aspirante.doc === nuevosDatos.doc);
+	let actualizarUsuarioMongo = await actualizarUserMongo(nuevosDatos);
 
-	if (usuarioIndice >= 0) {
-
-		if (usuarios[usuarioIndice].rol !== nuevosDatos.rol) {
-			usuarios[usuarioIndice].rol = nuevosDatos.rol;
-			guardarUsuarios(usuarios);
-		}
-	}
-	if (aspiranteIndice >= 0) {
-		let nuevoAspirante = nuevosDatos;
-		resultado['boton'] = nuevosDatos.boton;
-		resultado['doc_trigger'] = nuevosDatos.doc_trigger;
-		resultado['rol'] = nuevoAspirante.rol;
-
-		delete nuevoAspirante.rol;
-		delete nuevoAspirante.boton;
-		delete nuevoAspirante.doc_trigger;
-		delete nuevoAspirante[`rol${nuevosDatos.doc}`];
-
-		aspirantes[aspiranteIndice] = nuevoAspirante;
-		guardarAspirantes(aspirantes);
-
+	if(actualizarUsuarioMongo){
 		resultado['estado'] = 'ok';
-		//resultado['rol'] = 'interesado';
-		resultado['msg'] = 'Usuario actualizado correctamente!';
-		return resultado;
+		resultado['rol'] = 'interesado';
+	 	resultado['msg'] = 'Usuario actualizado correctamente!';
+	}else{
+		resultado['estado'] = 'error';
+		resultado['rol'] = 'interesado';
+	 	resultado['msg'] = 'No se pudo actualizar el usuario';
 	}
+
+	return resultado;
+};
+
+const actualizarUserMongo = async (user) =>{
+	const res = () => {
+		return new Promise(function(resolve, reject) {
+			UsuarioModel.findOneAndUpdate({doc:user.doc},user,{new:true},(error,result)=>{
+				if(error)
+					throw error;
+				
+				resolve(true);
+			});
+		});
+	};
+
+	let result = await res();
+	return result;
 };
 
 const ingresar = (usuarioAValidar, callback) => {
@@ -579,15 +717,16 @@ const ingresar = (usuarioAValidar, callback) => {
 	);
 };
 
-const listarDocentes = () => {
-	let usuarios = listarUsuarios();
+const listarDocentes = async () => {
+	let usuarios = await listarUsuarios();
 	let usuariosDocentes = usuarios.filter((usuario) => usuario.rol === 'docente');
 
 	if (usuariosDocentes.length === 0) return [];
 	let docentes = [];
 
-	usuariosDocentes.forEach((usuario, indice) => {
-		let docente = listarAspirantes().find((aspirante) => aspirante.doc === usuario.doc);
+	usuariosDocentes.forEach(async(usuario, indice) => {
+		let aspirantes = await listarAspirantes();
+		let docente = aspirantes.find((aspirante) => aspirante.doc === usuario.doc);
 		docentes.push(docente);
 	});
 
@@ -607,8 +746,21 @@ const consultarAspirante = (doc, callback) => {
 	});
 };
 
+const mostrarCursosLista = async(rol, doc, action) => {
+
+	let cursos = await mostrarCursos(rol,doc,action);
+	return cursos;
+}
+
+const mostrarAspirantesXCursoLista = async()=>{
+	let result = await mostrarAspirantesXCurso();
+	return result;
+}
+
 module.exports = {
 	mostrarCursos: mostrarCursos,
+	mostrarCursosLista: mostrarCursosLista,
+	mostrarAspirantesXCursoLista:mostrarAspirantesXCursoLista,
 	crearCurso: crearCurso,
 	crearAspirante: crearAspirante,
 	mostrarAspirantesXCurso: mostrarAspirantesXCurso,
