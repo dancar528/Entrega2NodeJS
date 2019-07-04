@@ -19,12 +19,10 @@ const cursoSchema = new Schema({
 		required: true
 	},
 	modalidad:{
-		type: String,
-		required: true
+		type: String
 	},
 	intensidad: {
-		type: String,
-		required: true
+		type: String
     },
     estado: {
 		type: String,
