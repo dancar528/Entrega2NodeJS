@@ -359,8 +359,8 @@ app.get('/salir', (req, res) => {
 	
 });
 
-app.listen(3000, () => 
-	console.log('Servidor escuchando en el puerto 3000')
+app.listen(process.env.PORT, () =>
+	console.log('Servidor escuchando en el puerto ' + process.env.PORT)
 );
 
 
