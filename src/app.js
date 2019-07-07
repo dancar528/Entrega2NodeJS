@@ -7,6 +7,7 @@ const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 require('./helpers');
+require('./config/config');
 const {
 	crearCurso,
 	actualizarEstadoCurso,
@@ -56,7 +57,7 @@ app.use((req, res, next) => {
 });
 
 mongoose.connect(
-	'mongodb://localhost:27017/educacionContinua',
+	process.env.URLDB,
 	{ useNewUrlParser: true},
 	(err, resultado) => {
 		if (err) {
