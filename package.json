@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app"
   },
   "author": "Daniela <dancar.528@gmail.com> (https://twitter/dcardoh)",
   "license": "ISC",
