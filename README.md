@@ -1,22 +1,38 @@
-Para ejecutar el proyecto:
+## Descargar proyecto
+  - Ir a https://github.com/dancar528/Entrega2NodeJS/releases/tag/1.0.4 y descargar en el formato deseado
+  - Ó clonar el proyecto, ir a https://github.com/dancar528/Entrega2NodeJS
+    - Clone or download, y copiar la url de git
+    - Ir a la carpeta donde se desea descargar el proyecto en su computador, abrir la consola y digitar ```git clone <url copiada de git>```
 
-Situarse en la carpeta del proyecto, abrir la consola y digitar el siguiente comando:
+## Instalar proyecto
+Situarse en la carpeta del proyecto, abrir la consola y digitar el siguiente comando, (para instalar las dependencias):
 
+```sh
 npm install
-
-Y luego
-
+```
+## Ejecutar aplicación
+Situarse en la carpeta del proyecto, abrir la consola y digitar el siguiente comando:
+```sh
 node src/app
+```
+ó
+```sh
+nodemon src/app -e js,hbs
+```
+#### Nota
+Para probar en local, se debe tener instalado __mongodb__ y crear la base de datos __educacionContinua__ con dos colecciones (o tablas): _usuarios_ y _aspirantes_, con los siguientes campos:
+  - __usuarios__: doc, password y rol, todos requeridos
+  - __aspirantes__: doc, nombre, correo y telefono, todos requeridos
 
-Dirigirse al navegador a:
+Insertar un registro en cada uno de estas colecciones (usuarios y aspirantes), lo importante es que el rol del usuario sea __coordinador__.
 
-localhost:3000
+## Probar aplicación
+Abrir un navegador y dirigirse a `localhost:3000`
 
-En el archivo usuarios.json estan los usuarios del sistema con su rol, documento y contraseña de acceso.
-
+### Funcionamiento básico de la aplicación.
+#### Roles:
 Al iniciar sesión, dependiendo del rol:
-	- Coordinador: le aparecen 3 menus, en uno se listan todos los cursos en todos los estados, en el otro solo los cursos disponibles y en el tercer menu permite administrar los usuarios: listarlos y modificarlos
-	- aspirante: le aparecen 2 menus, 1 de los cursos disponibles y otro donde muestra los cursos que tiene inscritos
-	- interesado: o usuario sin loguear, le aparece un menu de ver los cursos disponibles
-
-Para cerrar sesion basta con ir a localhost:3000
+  - __Coordinador__: le aparecen 3 menus, en uno se listan todos los cursos en todos los estados, en el otro solo los cursos disponibles y en el tercer menu permite administrar los usuarios: listarlos y modificarlos
+  - __aspirante__: le aparecen 2 menus, 1 de los cursos disponibles y otro donde muestra los cursos que tiene inscritos
+  - __docente__: le aparece un menu de ver los cursos que tiene asignados, junto con los aspirantes inscritos
+  - __interesado__: o usuario sin loguear, le aparece un menu de ver los cursos disponibles. Este rol no debe aparecer en la base de datos.
