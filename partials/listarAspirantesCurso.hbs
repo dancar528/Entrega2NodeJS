@@ -17,9 +17,9 @@
     					<td>{{nombre}}</td>
     					<td>{{correo}}</td>
     					<td>{{telefono}}</td>
-	    				{{#ifeq ../rol 'coordinador'}}
+	    				{{#if (mostrarPorRol ../rol 'coordinador' 'docente')}}
 	    				    <td><button type="submit" class="btn btn-primary" name="boton" value="eliminar">Eliminar</button></td>
-	    				{{/ifeq}}
+	    				{{/if}}
 					</form>
 				</tr>
 			{{/each}}

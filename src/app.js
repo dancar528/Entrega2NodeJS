@@ -66,14 +66,22 @@ mongoose.connect(
 	}
 );
 
-app.get('/', (req, res) => {
+app.get('/', async(req, res) => {
 	if (req.session.rol) {
+		let listacursoestudiante = [];
+		let docentes = [];
+		if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
+			listacursoestudiante = await mostrarAspirantesXCurso();
+			docentes = await listarDocentes();
+		}
 		res.render('cursos', {
 			rol: res.locals.rol_sesion,
 			resultado: resultado,
 			formulario: formulario,
 			action:'cursos_disponibles',
-			loggeado: (resultado!=null && resultado.estado === 'ok')
+			loggeado: (resultado!=null && resultado.estado === 'ok'),
+			resultlist: listacursoestudiante,
+			docentes: docentes
 		});
 	}else{
 
@@ -91,14 +99,15 @@ app.post('/', (req, res) => {
 	ingresar(req.body, async(resultado) => {
 		let listacursoestudiante = [];
 		let docentes = [];
-		if(resultado.rol=='coordinador'){
-			listacursoestudiante = await mostrarAspirantesXCurso();
-			docentes = await listarDocentes();
-		}
+		
 	    if (resultado.estado == 'ok') {
 	    	req.session.rol = resultado.rol;
 			res.locals.sesion = true;
-	    	res.locals.rol_sesion = resultado.rol;
+			res.locals.rol_sesion = resultado.rol;
+			if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
+				listacursoestudiante = await mostrarAspirantesXCurso();
+				docentes = await listarDocentes();
+			}
 	    	consultarAspirante(req.body.doc, (usuario) => {
 			    res.locals.nombre_usuario = usuario.nombre;
 			    res.locals.doc_sesion = usuario.doc;
@@ -133,7 +142,7 @@ app.post('/', (req, res) => {
 app.get('/cursos', async (req, res) => {
 	let listacursoestudiante = [];
 	let docentes = [];
-	if(req.session.rol=='coordinador'){
+	if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
 		listacursoestudiante = await mostrarAspirantesXCurso();
 		docentes = await listarDocentes();
 	}
@@ -151,7 +160,7 @@ app.get('/cursos', async (req, res) => {
 app.post('/cursos', async (req, res) => {
 	let listacursoestudiante = [];
 	let docentes = [];
-	if(req.session.rol=='coordinador'){
+	if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
 		listacursoestudiante = await mostrarAspirantesXCurso();
 		docentes = await listarDocentes();
 	}
@@ -177,7 +186,7 @@ app.post('/eliminar', async(req, res) => {
 		result = await eliminarAspiranteCurso(req.body.doc_aspirante, req.body.id_curso);
 	}
 
-	if(req.session.rol=='coordinador'){
+	if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
 		listacursoestudiante = await mostrarAspirantesXCurso();
 		docentes = await listarDocentes();
 	}
@@ -185,17 +194,16 @@ app.post('/eliminar', async(req, res) => {
 	if (req.query.action) {
 		req.body.action = req.query.action;
 	}
-	if (result.doc_aspirante) {
-		req.body.doc = result.doc_aspirante;
-	}
-
+	
+	req.body.doc = res.locals.doc_sesion;
+	
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
 		resultado: result,
-		formulario: req.query,
+		formulario: req.body,
 		cursosInscritos: req.query.action,
 		action:req.query.action,
-		loggeado: (resultado!=null && resultado.estado === 'ok'),
+		loggeado: res.locals.rol_sesion!=null,
 		resultlist: listacursoestudiante,
 		docentes: docentes
 	});
@@ -211,7 +219,7 @@ app.post('/actualizar', async(req, res) => {
 		resultado = await actualizarEstadoCurso(req.body.id_curso, req.body.estado, req.body.docente);
 	}
 
-	if(req.session.rol=='coordinador'){
+	if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
 		listacursoestudiante = await mostrarAspirantesXCurso();
 		docentes = await listarDocentes();
 	}
@@ -242,7 +250,7 @@ app.post('/crear', async(req, res) => {
 
 	let listacursoestudiante = [];
 	let docentes = [];
-	if(req.session.rol=='coordinador'){
+	if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
 		listacursoestudiante = await mostrarAspirantesXCurso();
 		docentes = await listarDocentes();
 	}
@@ -264,8 +272,14 @@ app.post('/registro', async (req, res) => {
 		resultado = await crearAspirante(req.body);
 	}
 
+	res.locals.sesion = undefined;
+	res.locals.rol_sesion = undefined;
+
+	res.locals.rol_sesion = res.locals.rol_sesion === undefined || res.locals.rol_sesion=='interesado'
+	? 'aspirante' : res.locals.rol_sesion;
+
 	let parametros = {
-		//rol: res.locals.rol_sesion,
+		rol: res.locals.rol_sesion,
 		resultado: resultado,
 		formulario: req.body
 	};
@@ -311,14 +325,16 @@ app.post('/inscribirAspCurso', async(req, res) => {
 		resultado: resultado,
 		formulario: req.body,
 		action: 'cursos_disponibles',
-		loggeado: (resultado!=null && resultado.estado === 'ok')
+		loggeado: res.locals.sesion!=null,
 	});
 });
 
 app.get('/registro', (req, res) => {
+	res.locals.rol_sesion = res.locals.rol_sesion === undefined || res.locals.rol_sesion=='interesado'
+	? 'aspirante' : res.locals.rol_sesion;
 	res.render('formCrearUsuario', {
 		rol: res.locals.rol_sesion,
-		loggeado: (resultado!=null && resultado.estado === 'ok')
+		loggeado: res.locals.sesion!=null,
 	});
 });
 

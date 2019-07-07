@@ -81,7 +81,7 @@ hbs.registerHelper('mostrarAspirantesXCurso', (idCurso) => {
 hbs.registerHelper('listarAspirantesPorCurso', (lista,idCurso) => {
 	let aspirantes = lista.aspirantes;
 	let aspirantecursos = lista.aspirantescursos;
-	let curso = aspirantecursos.filter(aspiranteCurso => aspiranteCurso.id_curso === idCurso);
+	let curso = aspirantecursos.filter(aspiranteCurso => aspiranteCurso.id_curso == idCurso);
 
 	let resultado = []
 	curso.forEach((aspiranteCurso, indice) => {
@@ -112,8 +112,7 @@ hbs.registerHelper('mostrarUsuarios', (rol) => {
 });
 
 hbs.registerHelper('mostrarPorRol', (rolActual, rolPermitido, rolPermitido2) => {
-
-	if (rolActual === rolPermitido || rolActual === rolPermitido2) {
+	if (rolActual == rolPermitido || rolActual == rolPermitido2) {
 		return true;
 	}
 

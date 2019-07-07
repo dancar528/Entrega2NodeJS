@@ -609,12 +609,12 @@ const eliminarAspiranteCursoMongoDB = async (docAspirante,idCurso) => {
 };
 
 const actualizarUsuario = async (nuevosDatos) => {
-	nuevosDatos.doc = nuevosDatos.doc_trigger;
+	//nuevosDatos.doc = nuevosDatos.doc_trigger;
 
 	if (nuevosDatos[`rol${nuevosDatos.doc}`]) {
 		nuevosDatos.rol = nuevosDatos[`rol${nuevosDatos.doc}`];
 	}
-
+	console.log(nuevosDatos);
 	let resultado = [];
 	let camposObligatorios = [];
 	if (!nuevosDatos.doc) {
@@ -641,7 +641,22 @@ const actualizarUsuario = async (nuevosDatos) => {
 		return resultado;
 	}
 
+	//Chequeamos que el documento identidad a modificar no esté en uso
+	console.log(nuevosDatos.doc_trigger + " " + nuevosDatos.doc);
+	if(nuevosDatos.doc_trigger!=nuevosDatos.doc){
+		let usuarioFilter = await obtenerUsuarioPorId(nuevosDatos.doc);
+		console.log(usuarioFilter);
+		if(typeof usuarioFilter!=='undefined' && usuarioFilter.length>0){
+			resultado['estado'] = 'error';
+			resultado['rol'] = 'interesado';
+			resultado['msg'] = 'No se pudo actualizar el usuario, el nuevo id ya está en uso.';
+			return resultado;
+		}
+	}
+
 	let actualizarUsuarioMongo = await actualizarUserMongo(nuevosDatos);
+
+	actualizarUsuarioMongo = await actualizarAspiranteMongo(nuevosDatos);
 
 	if(actualizarUsuarioMongo){
 		resultado['estado'] = 'ok';
@@ -656,20 +671,47 @@ const actualizarUsuario = async (nuevosDatos) => {
 	return resultado;
 };
 
-const actualizarUserMongo = async (user) =>{
-	const res = () => {
-		return new Promise(function(resolve, reject) {
-			UsuarioModel.findOneAndUpdate({doc:user.doc},user,{new:true},(error,result)=>{
-				if(error)
-					throw error;
-				
-				resolve(true);
-			});
+const obtenerUsuarioPorId = async(doc) =>{
+	return new Promise(function(resolve, reject) {
+		UsuarioModel.find({doc:doc}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+		
+			resolve(result);
 		});
-	};
+	});
+};
 
-	let result = await res();
-	return result;
+const actualizarAspiranteMongo = async (aspirante) => {
+	return new Promise(function(resolve, reject) {
+		AspiranteModel.findOneAndUpdate({doc:aspirante.doc_trigger},
+			{$set:{
+				doc:aspirante.doc,
+				nombre:aspirante.nombre,
+				correo:aspirante.correo,
+				telefono:aspirante.telefono
+			}},{new:true},(error,result)=>{
+			if(error)
+				throw error;
+			
+			resolve(true);
+		});
+	});
+};
+
+const actualizarUserMongo = async (user) =>{
+	return new Promise(function(resolve, reject) {
+		UsuarioModel.findOneAndUpdate({doc:user.doc_trigger},
+			{$set:{
+				doc:user.doc,
+				rol:user.rol
+			}},{new:true},(error,result)=>{
+			if(error)
+				throw error;
+			
+			resolve(true);
+		});
+	});
 };
 
 const ingresar = (usuarioAValidar, callback) => {
