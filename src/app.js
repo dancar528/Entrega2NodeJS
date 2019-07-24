@@ -8,6 +8,10 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 require('./helpers');
 require('./config/config');
+//require('./chat/app');
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+const { Usuario } = require('./chat/Usuario');
 const {
 	crearCurso,
 	actualizarEstadoCurso,
@@ -85,13 +89,11 @@ app.get('/', async(req, res) => {
 			docentes: docentes
 		});
 	}else{
-
 		res.render('index', {
 			rol: '',
 			loggeado: (resultado!=null && resultado.estado === 'ok')
 		});
 	}
-	
 });
 
 app.post('/', (req, res) => {
@@ -359,10 +361,55 @@ app.get('/salir', (req, res) => {
 	
 });
 
-app.listen(process.env.PORT, () =>
-	console.log('Servidor escuchando en el puerto ' + process.env.PORT)
-);
+let contador = 0;
+const usuario = new Usuario();
+// del servidor al cliente
+io.on('connection', client => {
+	console.log('un usuario se ha conectado');
+	//console.log(client.id);
+/*
+	// del cliente al servidor
+	client.emit('mensaje', 'Bienvenido');
 
+	// del servidor al cliente
+	client.on('mensaje', (info) => {
+		console.log(info);
+	});
+
+	// del servidor al cliente
+	client.on('contador', () => {
+		contador++;
+		console.log('contador', contador);
+		io.emit('contador', contador);
+	});
+*/
+	client.on('texto', (texto) => {
+		console.log('textooooo', texto);
+		io.emit('texto', texto);
+	});
+
+	client.on('usuarioNuevo', (usuarioNuevo) => {
+		console.log('usuarioNuevo: ');
+
+		let usuarios = usuario.agregarUsuario({
+			clientId: client.id,
+			nombre: usuarioNuevo
+		});
+		let txt = `${usuarioNuevo} se ha conectado`;
+		console.log('usuarios: ', usuarios);
+		//console.log('textooooo', texto);
+		// enviar a todos los uusarios conectados
+		io.emit('nuevoUsuario', txt);
+	});
+});
+
+/*app.listen(process.env.PORT, () =>
+	console.log('Servidor escuchando en el puerto ' + process.env.PORT)
+);*/
+
+server.listen(process.env.PORT, (err) => {
+	console.log(`servidor en el puerto ${process.env.PORT}`);
+});
 
 //app.use('/css', express.static(dirNode_modules) + '/bootstrap/css');
 //app.use('/js', express.static(dirNode_modules) + '/jquery');
