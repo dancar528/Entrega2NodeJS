@@ -363,6 +363,7 @@ app.get('/salir', (req, res) => {
 
 let contador = 0;
 const usuario = new Usuario();
+console.log('usuario');
 // del servidor al cliente
 io.on('connection', client => {
 	console.log('un usuario se ha conectado');
@@ -390,6 +391,7 @@ io.on('connection', client => {
 
 	client.on('usuarioNuevo', (usuarioNuevo) => {
 		console.log('usuarioNuevo: ');
+debugger;
 
 		let usuarios = usuario.agregarUsuario({
 			clientId: client.id,
@@ -400,6 +402,19 @@ io.on('connection', client => {
 		//console.log('textooooo', texto);
 		// enviar a todos los uusarios conectados
 		io.emit('nuevoUsuario', txt);
+	});
+
+	client.on('disconnected', () => {
+		console.log('disconnected');
+		//debugger;
+		//const usuario = new Usuario();
+		let usuarioB = usuario.borrarUsuario(client.id);
+		let txt = `${usuarioB.nombre} se ha desconectado`;
+		io.emit('usuarioDesconectado', txt);
+
+		console.log('usuarios: ', usuario.getUsuarios());
+
+		client.disconnect();
 	});
 });
 
