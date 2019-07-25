@@ -362,12 +362,14 @@ app.get('/salir', (req, res) => {
 });
 
 let contador = 0;
-const usuario = new Usuario();
+let usuario = new Usuario();
 console.log('usuario');
 // del servidor al cliente
-io.on('connection', client => {
+//socket = io.of('/registro');
+
+io.sockets.on('connection', client => {
 	console.log('un usuario se ha conectado');
-	//console.log(client.id);
+	//console.log('client: ', client);
 /*
 	// del cliente al servidor
 	client.emit('mensaje', 'Bienvenido');
@@ -384,9 +386,25 @@ io.on('connection', client => {
 		io.emit('contador', contador);
 	});
 */
+	let roomSS = null;
+	client.on('create', (room) => {
+		console.log('romm', room);
+		client.join(room);
+		if (room) {
+			roomSS = room;
+		}
+	});
+	//client.join('testRoom');
+//console.dir(client);
 	client.on('texto', (texto) => {
-		console.log('textooooo', texto);
-		io.emit('texto', texto);
+		console.log('textooooo home', texto);
+		//io.to('room1').emit('texto', texto);
+		io.to(roomSS).emit('texto', texto);
+		//console.log('rooms: ', io.nsps);
+		//console.log('rooms client: ', client.rooms.room1);
+		//console.log('io.rooms: ', io);
+		//console.log('textooooo home::::: ', texto);
+
 	});
 
 	client.on('usuarioNuevo', (usuarioNuevo) => {
@@ -401,7 +419,7 @@ debugger;
 		console.log('usuarios: ', usuarios);
 		//console.log('textooooo', texto);
 		// enviar a todos los uusarios conectados
-		io.emit('nuevoUsuario', txt);
+		io.to(roomSS).emit('nuevoUsuario', txt);
 	});
 
 	client.on('disconnected', () => {
@@ -410,7 +428,7 @@ debugger;
 		//const usuario = new Usuario();
 		let usuarioB = usuario.borrarUsuario(client.id);
 		let txt = `${usuarioB.nombre} se ha desconectado`;
-		io.emit('usuarioDesconectado', txt);
+		io.to(roomSS).emit('usuarioDesconectado', txt);
 
 		console.log('usuarios: ', usuario.getUsuarios());
 
