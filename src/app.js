@@ -96,6 +96,14 @@ app.get('/', async(req, res) => {
 	}
 });
 
+app.post('/entrarCurso', (req, res) => {
+	res.render('curso', {
+		id_curso: req.body.id_curso,
+		nombre_usuario: req.body.nombre_usuario,
+		nombre_curso: req.body.nombre_curso
+	});
+});
+
 app.post('/', (req, res) => {
 
 	formulario = req.body;
@@ -126,7 +134,7 @@ app.post('/', (req, res) => {
 					formulario: req.body,
 					action: 'cursosinscritos',
 					resultlist: listacursoestudiante,
-					docentes: docentes,
+					docentes: docentes
 				});
 			});
 	    } else {
@@ -362,11 +370,11 @@ app.get('/salir', (req, res) => {
 });
 
 let contador = 0;
-let usuario = new Usuario();
 console.log('usuario');
 // del servidor al cliente
 //socket = io.of('/registro');
-
+//let roomSS = null;
+let usuarios2 = null;
 io.sockets.on('connection', client => {
 	console.log('un usuario se ha conectado');
 	//console.log('client: ', client);
@@ -387,12 +395,28 @@ io.sockets.on('connection', client => {
 	});
 */
 	let roomSS = null;
-	client.on('create', (room) => {
+	let	usuario = null;
+	client.on('create', (room, usuarioNuevo) => {
 		console.log('romm', room);
 		client.join(room);
 		if (room) {
 			roomSS = room;
+			usuario = new Usuario();
 		}
+		console.log('usuariosssssssssss: ', usuario.getUsuarios());
+		console.log('usuarioNuevo: ');
+debugger;
+
+		let usuarios = usuario.agregarUsuario({
+			clientId: client.id,
+			nombre: usuarioNuevo,
+			room: room
+		});
+		let txt = `${usuarioNuevo} se ha conectado`;
+		console.log('usuarios: ', usuarios);
+		//console.log('textooooo', texto);
+		// enviar a todos los uusarios conectados
+		io.to(roomSS).emit('nuevoUsuario', txt);
 	});
 	//client.join('testRoom');
 //console.dir(client);
@@ -407,25 +431,14 @@ io.sockets.on('connection', client => {
 
 	});
 
-	client.on('usuarioNuevo', (usuarioNuevo) => {
-		console.log('usuarioNuevo: ');
-debugger;
+	/*client.on('usuarioNuevo', (usuarioNuevo) => {
 
-		let usuarios = usuario.agregarUsuario({
-			clientId: client.id,
-			nombre: usuarioNuevo
-		});
-		let txt = `${usuarioNuevo} se ha conectado`;
-		console.log('usuarios: ', usuarios);
-		//console.log('textooooo', texto);
-		// enviar a todos los uusarios conectados
-		io.to(roomSS).emit('nuevoUsuario', txt);
-	});
+	});*/
 
 	client.on('disconnected', () => {
 		console.log('disconnected');
 		//debugger;
-		//const usuario = new Usuario();
+		//usuario = new Usuario();
 		let usuarioB = usuario.borrarUsuario(client.id);
 		let txt = `${usuarioB.nombre} se ha desconectado`;
 		io.to(roomSS).emit('usuarioDesconectado', txt);

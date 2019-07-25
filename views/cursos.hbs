@@ -97,6 +97,16 @@
 					{{else}}
 						{{>formEliminarAspiranteCurso rol=../rol_sesion resultado=../resultado formulario=../formulario id_curso=id}}
 					{{/if}}
+	    			{{#if (mostrarPorRol ../rol 'aspirante' 'docente')}}
+		        		{{#ifeq ../action 'cursosinscritos'}}
+		        			<form action="/entrarCurso" method="post">
+		        			<input type="hidden" name="id_curso" value="{{id}}" >
+		        			<input type="hidden" name="nombre_usuario" value="{{../nombre_usuario}}" >
+		        			<input type="hidden" name="nombre_curso" value="{{nombre}}" >
+							<button class="btn btn-primary" name="boton" value="entrarCurso">Entrar al curso</button>
+		        			</form>
+		        		{{/ifeq}}
+			        {{/if}}
 				{{/ifnoteq}}
 		        {{#ifeq ../rol_sesion 'coordinador'}}
 			        {{>actualizarCurso rol=../rol_sesion resultado=../resultado formulario=../formulario id_curso=id docentes=../docentes}}	
