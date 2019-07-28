@@ -374,43 +374,17 @@ app.get('/salir', (req, res) => {
 	
 });
 
-let contador = 0;
-console.log('usuario');
-// del servidor al cliente
-//socket = io.of('/registro');
-//let roomSS = null;
-let usuarios2 = null;
 io.sockets.on('connection', client => {
 	console.log('un usuario se ha conectado');
-	//console.log('client: ', client);
-/*
-	// del cliente al servidor
-	client.emit('mensaje', 'Bienvenido');
-
-	// del servidor al cliente
-	client.on('mensaje', (info) => {
-		console.log(info);
-	});
-
-	// del servidor al cliente
-	client.on('contador', () => {
-		contador++;
-		console.log('contador', contador);
-		io.emit('contador', contador);
-	});
-*/
 	let roomSS = null;
 	let	usuario = null;
+
 	client.on('create', (room, usuarioNuevo) => {
-		console.log('romm', room);
 		client.join(room);
 		if (room) {
 			roomSS = room;
 			usuario = new Usuario();
 		}
-		console.log('usuariosssssssssss: ', usuario.getUsuarios());
-		console.log('usuarioNuevo: ');
-debugger;
 
 		let usuarios = usuario.agregarUsuario({
 			clientId: client.id,
@@ -418,37 +392,17 @@ debugger;
 			room: room
 		});
 		let txt = `${usuarioNuevo} se ha conectado`;
-		console.log('usuarios: ', usuarios);
-		//console.log('textooooo', texto);
-		// enviar a todos los uusarios conectados
 		io.to(roomSS).emit('nuevoUsuario', txt);
 	});
-	//client.join('testRoom');
-//console.dir(client);
-	client.on('texto', (texto) => {
-		console.log('textooooo home', texto);
-		//io.to('room1').emit('texto', texto);
-		io.to(roomSS).emit('texto', texto);
-		//console.log('rooms: ', io.nsps);
-		//console.log('rooms client: ', client.rooms.room1);
-		//console.log('io.rooms: ', io);
-		//console.log('textooooo home::::: ', texto);
 
+	client.on('texto', (texto) => {
+		io.to(roomSS).emit('texto', texto);
 	});
 
-	/*client.on('usuarioNuevo', (usuarioNuevo) => {
-
-	});*/
-
 	client.on('disconnected', () => {
-		console.log('disconnected');
-		//debugger;
-		//usuario = new Usuario();
 		let usuarioB = usuario.borrarUsuario(client.id);
 		let txt = `${usuarioB.nombre} se ha desconectado`;
 		io.to(roomSS).emit('usuarioDesconectado', txt);
-
-		console.log('usuarios: ', usuario.getUsuarios());
 
 		client.disconnect();
 	});

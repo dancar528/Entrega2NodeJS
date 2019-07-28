@@ -36,3 +36,8 @@ Al iniciar sesión, dependiendo del rol:
   - __aspirante__: le aparecen 2 menus, 1 de los cursos disponibles y otro donde muestra los cursos que tiene inscritos
   - __docente__: le aparece un menu de ver los cursos que tiene asignados, junto con los aspirantes inscritos
   - __interesado__: o usuario sin loguear, le aparece un menu de ver los cursos disponibles. Este rol no debe aparecer en la base de datos.
+  
+  ### Funcionamiento del chat.
+ Como aspirante o docente entra por mis cursos o cursos asignados (en el caso del coordinador), se selecciona un curso, dar clic en más información y ahí debe aparecer un botón llamado entrar al curso. Existe un chat por cada curso creado, de manera que si un aspirante o docente tiene varios cursos inscritos o asignados, solo le aparecerá el contenido de cada curso en el chat seleccionado.
+ 
+  

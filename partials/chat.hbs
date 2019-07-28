@@ -1,17 +1,20 @@
 <div class="container">
 	<form id="preFormChat" action="/" method="post">
-		<input type="text" id="nombre" value="{{nombre_usuario}}"/>
+		<input type="hidden" id="nombre" value="{{nombre_usuario}}"/>
 		<input type="hidden" id="room" value="{{id_curso}}"/>
-		<button id="unirChat">Chat</button>
-		<button id="dejarChat">Dejar Chat</button>
+		<button id="unirChat" class="btn btn-primary">Unirse al chat</button>
+		<button id="dejarChat" class="btn btn-primary">Dejar el chat</button>
 	</form>
 	<div id="chatContent">
-		<form id="formChat" action="/" method="post">
-			<input type="text" id="texto" />
-		  	<button>Enviar</button>
-		</form>
+		<div id="chatContentMessages" style="margin-top: 20px">
+		</div>
+		<div id="chatContentForm" class="form-inline my-2 my-lg-0">
+			<form id="formChat" action="/" method="post">
+				<input type="text" id="texto" class="form-control mr-sm-2"/>
+			  	<button class="btn btn-primary my-2 my-sm-0">Enviar</button>
+			</form>
+		</div>
 	</div>
-	{{id_curso}} {{nombre_usuario}}
 </div>
 
 <script src="socket.io/socket.io.js"></script>
