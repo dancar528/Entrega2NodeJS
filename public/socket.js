@@ -44,6 +44,11 @@ document.querySelector('#preFormChat #unirChat').addEventListener('click',
 		let node = document.createElement('P');
 		let textnode = document.createTextNode(mensaje.nombre + ': ' + mensaje.texto);
 		node.appendChild(textnode);
+		console.log('---------------');
+		console.log('scrollTop', document.getElementById('chatContentMessages').scrollTop);
+		console.log('clientHeight', document.getElementById('chatContentMessages').clientHeight);
+		console.log('scrollHeight', document.getElementById('chatContentMessages').scrollHeight);
+		console.log('---------------');
 		document.getElementById('chatContentMessages').appendChild(node);
 	});
 
