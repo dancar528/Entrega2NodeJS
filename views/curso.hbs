@@ -1,11 +1,62 @@
 {{>header}}
 <div class="container">
-	<div class="row">
-		<div class="col">
-			<form id="formUpload" action="" method="post">
-			</form>
+	{{#if (alertaValidarCampos resultado.boton 'subirarchivo')}}
+		<div class="row">
+			<div class="bs-component" align="center" style="margin-left: 150px">
+				<div class="alert alert-dismissible alert-{{mostrarAlerta resultado}}">
+					<button type="button" class="close" data-dismiss="alert">×</button>
+					<strong>{{resultado.estado}}!</strong> {{resultado.msg}}
+				</div>
+			</div>
 		</div>
-		<div class="col">
+	{{/if}}
+	<div class="row">
+		<div class="col-xs-12 col-md-6 col-lg-6">
+			<div class="tituloUpload">
+				{{#ifnoteq docentedelcurso ''}}
+					<h4>Subir un nuevo archivo para el curso</h4>
+					<div class="divider"></div>
+					<div class="row">
+						<div class="col-xs-8 col-md-8 col-lg-8">
+							<form id="formUpload" action="subirModulo" method="post" enctype="multipart/form-data">
+								<input type="hidden" name="boton" value="subirarchivo">
+								<input type="hidden" name="id_curso" value="{{id_curso}}"><br>
+								<div class="input-group"> 
+									<div class="custom-file"> 
+										<input type="file" class="custom-file-input" id="archivo" name="archivo" accept=".txt"> 
+										<label class="custom-file-label" for="archivo">Seleccionar el archivo</label> 
+									</div> 
+									<div class="input-group-append"> 
+										<button class="input-group-text" type="submit">Subir Archivo</button> 
+									</div> 
+								</div>
+							</form>
+						</div>
+					</div>
+					
+				{{/ifnoteq}}
+			</div>
+			<div class="listaModulos">
+				{{#ifeq esalumnodocente ''}}
+					<h4>Lo siento, debe ser alumno inscrito en el curso o
+						el docente para ver los módulos
+					</h4>
+				{{/ifeq}}
+				{{#ifnoteq esalumnodocente ''}}
+					<br>
+					<h4>Lista de Archivos</h4>
+					<ul class="list-group">
+						{{#each modulos}}
+							  <li class="list-group-item">
+								  <a download="{{nombre}}"
+								  href="data:text/plain;base64,{{ruta}}">{{nombre}}</a>
+							  </li>
+						{{/each}}
+					</ul>
+				{{/ifnoteq}}
+			</div>
+		</div>
+		<div class="col-xs-12 col-md-6 col-lg-6">
 			{{>chat id_curso=id_curso nombre_usuario=nombre_usuario}}
 		</div>
 	</div>

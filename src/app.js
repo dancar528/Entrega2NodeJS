@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const multer = require('multer');
 require('./helpers');
 require('./config/config');
 //require('./chat/app');
@@ -23,11 +24,17 @@ const {
 	actualizarUsuario,
 	consultarAspirante,
 	mostrarAspirantesXCurso,
-	listarDocentes
+	listarDocentes,
+	esDocenteDelCurso,
+	esAlumnoDelCurso,
+	obtenerModulosPorCurso,
+	ingresarModulo
 } = require('./funciones');
 
 var resultado=null;
 var formulario=null;
+
+var upload = multer({});
 
 /*if (typeof localStorage === 'undefined' || localStorage === null) {
 	// si no existe un local storage, crea una carpeta llamada scratch
@@ -97,11 +104,85 @@ app.get('/', async(req, res) => {
 	}
 });
 
-app.post('/entrarCurso', (req, res) => {
+app.post('/entrarCurso', async(req, res) => {
+
+	let esdocentedelcurso = await esDocenteDelCurso(res.locals.doc_sesion,req.body.id_curso);
+
+	let esalumnodocente = '';
+	if(esdocentedelcurso!=''){
+		esalumnodocente = 'esalumnodocente';
+	}else{
+		esalumnodocente = await esAlumnoDelCurso(res.locals.doc_sesion,req.body.id_curso);
+	}
+
+	let listamodulos = [];
+
+	if(esalumnodocente!=''){
+		listamodulos = await obtenerModulosPorCurso(req.body.id_curso);
+		if(typeof listamodulos!=='undefined'){
+			listamodulos.forEach(element => {
+				element.ruta = Buffer.from(element.ruta.toString()).toString('base64');
+			});
+		}else{
+			listamodulos = [];
+		}
+	}
+
 	res.render('curso', {
 		id_curso: req.body.id_curso,
+		resultado: [],
 		nombre_usuario: req.body.nombre_usuario,
-		nombre_curso: req.body.nombre_curso
+		nombre_curso: req.body.nombre_curso,
+		doc: res.locals.doc_sesion,
+		docentedelcurso: esdocentedelcurso,
+		esalumnodocente:esalumnodocente,
+		modulos: listamodulos
+	});
+});
+
+app.post('/subirModulo', upload.single('archivo'),async(req, res) => {
+
+	let esdocentedelcurso = await esDocenteDelCurso(res.locals.doc_sesion,req.body.id_curso);
+
+	let esalumnodocente = '';
+	if(esdocentedelcurso!=''){
+		esalumnodocente = 'esalumnodocente';
+	}else{
+		esalumnodocente = await esAlumnoDelCurso(res.locals.doc_sesion,req.body.id_curso);
+	}
+
+	let result = [];
+
+	let data = {
+		id_curso:req.body.id_curso,
+		ruta: req.file.buffer,
+		nombre:req.file.originalname
+	}
+
+	result = await ingresarModulo(data);
+
+	let listamodulos = [];
+
+	if(esalumnodocente!=''){
+		listamodulos = await obtenerModulosPorCurso(req.body.id_curso);
+		if(typeof listamodulos!=='undefined'){
+			listamodulos.forEach(element => {
+				element.ruta = element.ruta.toString()
+			});
+		}else{
+			listamodulos = [];
+		}
+	}
+
+	res.render('curso', {
+		id_curso: req.body.id_curso,
+		resultado: result,
+		nombre_usuario: req.body.nombre_usuario,
+		nombre_curso: req.body.nombre_curso,
+		doc: res.locals.doc_sesion,
+		docentedelcurso: esdocentedelcurso,
+		esalumnodocente:esalumnodocente,
+		modulos: listamodulos
 	});
 });
 

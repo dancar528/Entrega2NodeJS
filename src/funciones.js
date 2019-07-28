@@ -6,7 +6,113 @@ const AspiranteModel = require('./models/aspirante');
 const CursoModel = require('./models/curso');
 const AspiranteCursoModel = require('./models/aspirantecurso');
 const NotificacionModel = require('./models/notificacion');
+const ModuloModel = require('./models/modulo');
 
+
+const ingresarModulo = async(modulo) =>{
+	//Realizamos validaciones
+
+	let resultado = [];
+	let camposObligatorios = [];
+
+	console.log(modulo);
+	if (!modulo.id_curso) {
+		camposObligatorios.push('id_curso');
+	}
+	if (!modulo.ruta) {
+		camposObligatorios.push('ruta');
+	}
+	if (!modulo.nombre) {
+		camposObligatorios.push('nombre');
+	}
+
+	if (camposObligatorios.length > 0) {
+		resultado['estado'] = 'error';
+		resultado['boton'] = 'subirarchivo';
+		//resultado['camposObligatorios'] = camposObligatorios;
+		resultado['msg'] = 'Favor completar los campos obligatorios';
+		return resultado;
+	}
+
+	let archivoSubido = await subirModulo(modulo);
+
+	if(archivoSubido){
+		resultado['estado'] = 'ok';
+		resultado['boton'] = 'subirarchivo';
+		//resultado['camposObligatorios'] = camposObligatorios;
+		resultado['msg'] = 'Se ha subido el módulo correctamente';
+		return resultado;
+	}else{
+		resultado['estado'] = 'error';
+		resultado['boton'] = 'subirarchivo';
+		//resultado['camposObligatorios'] = camposObligatorios;
+		resultado['msg'] = 'Hubo un error al subir el archivo';
+		return resultado;
+	}
+}
+
+const subirModulo = async(modulo) => {
+	let nuevoModulo = new ModuloModel({
+		fechaCreacion:Date.now(),
+		ruta:modulo.ruta,
+		nombre:modulo.nombre,
+		idCurso:modulo.id_curso,
+	});
+
+	return new Promise(function(resolve, reject) {
+		nuevoModulo.save((error,result)=>{
+			if(error)//return false;
+				resolve(false);
+			
+			resolve(true);
+		});
+	});
+}
+
+const esDocenteDelCurso = async(doc,idCurso) => {
+	let docente = await obtenerCursoPorDocenteYIdCurso(doc,idCurso);
+	
+	return (typeof docente !=='undefined') ? 'Docente' : '';
+}
+
+const obtenerCursoPorDocenteYIdCurso = async(doc,idCurso) =>{
+	return new Promise(function(resolve, reject) {
+		CursoModel.find({docente:doc,id:idCurso}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(result);
+		});
+	});
+}
+
+const esAlumnoDelCurso = async(doc,idCurso) => {
+	let alumno = await obtenerCursoPorAlumnoYIdCurso(doc,idCurso);
+	
+	return (typeof alumno !=='undefined') ? 'Alumno' : '';
+}
+
+const obtenerCursoPorAlumnoYIdCurso = async(doc,idCurso) =>{
+	return new Promise(function(resolve, reject) {
+		AspiranteCurso.find({doc_aspirante:doc,id_curso:idCurso}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(result);
+		});
+	});
+}
+
+const obtenerModulosPorCurso = async(idCurso) => {
+	return new Promise(function(resolve, reject) {
+		ModuloModel.find({idCurso:idCurso}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(result);
+		});
+	});
+}
 
 const enviarMensaje = (correodestino,asunto,mensaje) => {
 	sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -26,6 +132,17 @@ const obtenerAspirantePorDoc = async(docAspirante) => {
 				throw error;
 
 			resolve(JSON.parse(JSON.stringify(result)));
+		});
+	});
+}
+
+const obtenerCursoPorId = async(idCurso) => {
+	return new Promise(function(resolve, reject) {
+		CursoModel.find({id:idCurso}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(result);
 		});
 	});
 }
@@ -293,8 +410,9 @@ const crearAspiranteCurso = async (nuevoAspiranteCurso) => {
 		resultado['estado'] = 'ok';
 		resultado['msg'] = `Inscripcion exitosa en el curso ${nuevoAspiranteCurso.id_curso}`;
 		let usuario = await obtenerAspirantePorDoc(nuevoAspiranteCurso.doc_aspirante);
+		let cursoencontrado = await obtenerCursoPorId(nuevoAspiranteCurso.id_curso);
 		enviarMensaje(usuario[0].correo,'Curso inscrito correctamente','Se ha registro en el curso '+
-			nuevoAspiranteCurso.id_curso + ' correctamente.');
+			cursoencontrado[0].nombre + ' con id ' + nuevoAspiranteCurso.id_curso + ' correctamente.');
 	}else{
 		resultado['estado'] = 'error';
 		resultado['msg'] = `No se pudo inscribir el aspirante al curso ${nuevoAspiranteCurso.id_curso}`;
@@ -640,8 +758,9 @@ const eliminarAspiranteCurso = async(docAspirante, idCurso) => {
 			resultado['msg'] = `El aspirante con documento ${docAspirante} se elimino correctamente
 				del curso con codigo ${idCurso}`;
 			let usuario = await obtenerAspirantePorDoc(docAspirante);
+			let cursoencontrado = await obtenerCursoPorId(nuevoAspiranteCurso.id_curso);
 			enviarMensaje(usuario[0].correo,'Dado de baja','Se te ha dado de baja en el curso '+
-							idCurso + '.');
+				cursoencontrado[0].nombre + 'con id ' +	idCurso + '.');
 		}else{
 			resultado['estado'] = 'error';
 			resultado['id_curso'] = idCurso;
@@ -876,5 +995,9 @@ module.exports = {
 	mostrarUsuarios: mostrarUsuarios,
 	actualizarUsuario: actualizarUsuario,
 	listarDocentes: listarDocentes,
-	consultarAspirante: consultarAspirante
+	consultarAspirante: consultarAspirante,
+	esDocenteDelCurso: esDocenteDelCurso,
+	esAlumnoDelCurso: esAlumnoDelCurso,
+	obtenerModulosPorCurso: obtenerModulosPorCurso,
+	ingresarModulo:ingresarModulo
 };

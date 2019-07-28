@@ -100,10 +100,10 @@
 	    			{{#if (mostrarPorRol ../rol 'aspirante' 'docente')}}
 		        		{{#ifeq ../action 'cursosinscritos'}}
 		        			<form action="/entrarCurso" method="post">
-		        			<input type="hidden" name="id_curso" value="{{id}}" >
-		        			<input type="hidden" name="nombre_usuario" value="{{../nombre_usuario}}" >
-		        			<input type="hidden" name="nombre_curso" value="{{nombre}}" >
-							<button class="btn btn-primary" name="boton" value="entrarCurso" style="margin-bottom: 15px;">Entrar al curso</button>
+								<input type="hidden" name="id_curso" value="{{id}}" >
+								<input type="hidden" name="nombre_usuario" value="{{../nombre_usuario}}" >
+								<input type="hidden" name="nombre_curso" value="{{nombre}}" >
+								<button class="btn btn-primary" name="boton" value="entrarCurso" style="margin-bottom: 15px;">Entrar al curso</button>
 		        			</form>
 		        		{{/ifeq}}
 			        {{/if}}
