@@ -11,6 +11,7 @@ require('./config/config');
 //require('./chat/app');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+const sockets = io.listen(server);
 const { Usuario } = require('./chat/Usuario');
 const {
 	crearCurso,
@@ -228,6 +229,10 @@ app.post('/actualizar', async(req, res) => {
 	
 	if (req.body.boton == 'actualizar') {
 		resultado = await actualizarEstadoCurso(req.body.id_curso, req.body.estado, req.body.docente);
+	}
+
+	if(resultado.estado == 'ok'){
+		
 	}
 
 	if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){

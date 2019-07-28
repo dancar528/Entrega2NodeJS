@@ -1,9 +1,34 @@
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const sgMail = require('@sendgrid/mail');
 const UsuarioModel = require('./models/usuario');
 const AspiranteModel = require('./models/aspirante');
 const CursoModel = require('./models/curso');
 const AspiranteCursoModel = require('./models/aspirantecurso');
+const NotificacionModel = require('./models/notificacion');
+
+
+const enviarMensaje = (correodestino,asunto,mensaje) => {
+	sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+	const msg = {
+		to: correodestino,
+		from: 'hurtadojosej@gmail.com',
+		subject: asunto,
+		text: mensaje
+	};
+	sgMail.send(msg);	   
+}
+
+const obtenerAspirantePorDoc = async(docAspirante) => {
+	return new Promise(function(resolve, reject) {
+		AspiranteModel.find({doc:docAspirante}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(JSON.parse(JSON.stringify(result)));
+		});
+	});
+}
 
 const cargarAspirantesCursos = async () => {
 	return new Promise(function(resolve, reject) {
@@ -97,7 +122,6 @@ const mostrarAspirantesXCurso = async () => {
 
 	resultado['aspirantes']=aspirantes;
 	resultado['aspirantescursos']=aspirantesCursos;
-	//console.log(resultado);
 	return resultado;
 };
 
@@ -208,6 +232,9 @@ const crearAspirante = async (nuevoAspirante) => {
 		guardarAspiranteMongoDB(nuevoAspirante);
 	
 		guardarUsuarioMongoDB(usuario);
+
+		enviarMensaje(nuevoAspirante.correo,'Usuario creado correctamente','El usuario con nombre ' 
+			+ nuevoAspirante.nombre + ' fue creado exitosamente.');
 	
 		resultado['estado'] = 'ok';
 		resultado['msg'] = `Usuario registrado correctamente!. Recuerda ingresar con el documento`;
@@ -265,6 +292,9 @@ const crearAspiranteCurso = async (nuevoAspiranteCurso) => {
 	if(aspiranteCursoGuardado){
 		resultado['estado'] = 'ok';
 		resultado['msg'] = `Inscripcion exitosa en el curso ${nuevoAspiranteCurso.id_curso}`;
+		let usuario = await obtenerAspirantePorDoc(nuevoAspiranteCurso.doc_aspirante);
+		enviarMensaje(usuario[0].correo,'Curso inscrito correctamente','Se ha registro en el curso '+
+			nuevoAspiranteCurso.id_curso + ' correctamente.');
 	}else{
 		resultado['estado'] = 'error';
 		resultado['msg'] = `No se pudo inscribir el aspirante al curso ${nuevoAspiranteCurso.id_curso}`;
@@ -307,6 +337,8 @@ const actualizarEstadoCurso = async(idCurso, nuevoEstado, docente) => {
 			Por tanto no se realiza ninguna actualizacion`;
 		return resultado;
 	} else {
+		let antiguoEstado = cursos[cursoIndice].estado;
+		let antiguoDocente = cursos[cursoIndice].docente;
 		cursos[cursoIndice].estado = nuevoEstado ? nuevoEstado : 'Disponible'; 
 		cursos[cursoIndice].docente = docente ? docente : 'Sin docente asignado';
 
@@ -319,6 +351,21 @@ const actualizarEstadoCurso = async(idCurso, nuevoEstado, docente) => {
 			resultado['boton'] = 'actualizar';
 			resultado['id_curso'] = idCurso;
 			resultado['msg'] = `Curso con codigo ${idCurso} actualizado correctamente`;
+			let fechaNotificacion = Date.now();
+			let mensaje = '';
+
+			if(antiguoEstado != cursos[cursoIndice].estado){
+				mensaje = 'Se ha actualizado el curso ' + nuevoCurso.nombre + 
+						   ' de ' + antiguoEstado + ' a ' + nuevoEstado + '. ';	
+			}
+
+			if(antiguoDocente != cursos[cursoIndice].docente){
+				mensaje += 'Se ha cambiado el docente.';
+			}
+			
+			resultado['fechaNotificacion'] = fechaNotificacion;
+			resultado['mensajeNotificacion'] = mensaje;
+			//await crearNotificacionCurso(idCurso,mensaje,fechaNotificacion);
 		}else{
 			resultado['estado'] = 'error';
 			resultado['boton'] = 'actualizar';
@@ -327,6 +374,19 @@ const actualizarEstadoCurso = async(idCurso, nuevoEstado, docente) => {
 		}
 		return resultado;
 	}
+};
+
+const crearNotificacionCurso = async (idCurso, mensaje, fechaNotificacion) => {
+	let nuevaNotificacion = new NotificacionModel({
+		idCurso: idCurso,
+		mensaje: mensaje,
+		fechaCreacion: fechaNotificacion
+	});
+	nuevaNotificacion.save((err, resultado) => {
+		if (err) {
+			return console.log(err);
+		}
+	});
 };
 
 const actualizarCursoMongo = async (curso) =>{
@@ -579,6 +639,9 @@ const eliminarAspiranteCurso = async(docAspirante, idCurso) => {
 			resultado['boton'] = 'remover';
 			resultado['msg'] = `El aspirante con documento ${docAspirante} se elimino correctamente
 				del curso con codigo ${idCurso}`;
+			let usuario = await obtenerAspirantePorDoc(docAspirante);
+			enviarMensaje(usuario[0].correo,'Dado de baja','Se te ha dado de baja en el curso '+
+							idCurso + '.');
 		}else{
 			resultado['estado'] = 'error';
 			resultado['id_curso'] = idCurso;

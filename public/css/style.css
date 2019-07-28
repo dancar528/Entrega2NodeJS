@@ -1,3 +1,93 @@
-* {
-	
+.buttonNotifications{
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 99;
+}
+
+.circleNotification{
+    border-radius: 50%;
+    height: 60px;
+    width: 60px;
+    background-color: #2c3e50!important;
+}
+
+.badgeNotification {
+    height: 35px;
+    min-width: 35px;
+    top: -15px;
+    right: -12px;
+    padding: 3px;
+    border: 2px solid #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f44336;
+    position: absolute;
+    color: #fff;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+}
+
+.notifications {
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 10px;
+    -moz-background-clip: padding-box;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    -webkit-transition: 0.25s ease-out 0.1s opacity;
+    -moz-transition: 0.25s ease-out 0.1s opacity;
+    -o-transition: 0.25s ease-out 0.1s opacity;
+    transition: 0.25s ease-out 0.1s opacity;
+    background: #ecf0f1;
+    border: 1px solid #bdc3c7;
+    /* left: 10px; */
+    position: fixed;
+    /* top: -999px; */
+    z-index: 9999;
+    bottom: 100px;
+    right: 20px;
+    height: 400px;
+    /* margin: auto; */
+}
+
+.notifications .notifications-list {
+    list-style: none;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+.notifications .notifications-list .item.no-data {
+    display: none;
+    text-align: center;
+}
+
+.notifications .notifications-list .item {
+    -webkit-transition: -webkit-transform 0.25s ease-out 0.1s;
+    -moz-transition: -moz-transform 0.25s ease-out 0.1s;
+    -o-transition: -o-transform 0.25s ease-out 0.1s;
+    transition: transform 0.25s ease-out 0.1s;
+    border-top: 1px solid #bdc3c7;
+    color: #7f8c8d;
+    cursor: default;
+    display: block;
+    padding: 10px;
+    position: relative;
+    white-space: nowrap;
+    width: 350px;
+}
+
+.notifications .notifications-list .item.expired {
+    color: #bdc3c7;
+}
+
+.notifications h3, .notifications .show-all {
+    background: #3498db;
+    color: #fefefe;
+    margin: 0;
+    padding: 10px;
+    width: 350px;
 }
