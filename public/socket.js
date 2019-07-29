@@ -3,6 +3,7 @@ socket = null;
 const formulario = document.getElementById('formChat');
 const preForm = document.getElementById('preFormChat');
 const content = document.getElementById('chatContent');
+const contentMessages = document.getElementById('chatContentMessages');
 
 content.style.display = 'none';
 preForm.elements.dejarChat.style.display = 'none';
@@ -28,7 +29,7 @@ document.querySelector('#preFormChat #unirChat').addEventListener('click',
 		let node = document.createElement('P');
 		let textnode = document.createTextNode(texto);
 		node.appendChild(textnode);
-		document.getElementById('chatContentMessages').appendChild(node);
+		contentMessages.appendChild(node);
 	});
 
 	formulario.addEventListener('submit', (submitEvent) => {
@@ -44,22 +45,26 @@ document.querySelector('#preFormChat #unirChat').addEventListener('click',
 		let node = document.createElement('P');
 		let textnode = document.createTextNode(mensaje.nombre + ': ' + mensaje.texto);
 		node.appendChild(textnode);
-		console.log('---------------');
-		console.log('scrollTop', document.getElementById('chatContentMessages').scrollTop);
-		console.log('clientHeight', document.getElementById('chatContentMessages').clientHeight);
-		console.log('scrollHeight', document.getElementById('chatContentMessages').scrollHeight);
-		console.log('---------------');
-		document.getElementById('chatContentMessages').appendChild(node);
+		contentMessages.appendChild(node);
+		shouldScroll = contentMessages.scrollTop + contentMessages.clientHeight === contentMessages.scrollHeight;
+
+		if (!shouldScroll) {
+		    scrollToBottom();
+		}
 	});
 
 	socket.on('usuarioDesconectado', (texto) => {
 		let node = document.createElement('P');
 		let textnode = document.createTextNode(texto);
 		node.appendChild(textnode);
-		document.getElementById('chatContentMessages').appendChild(node);
+		contentMessages.appendChild(node);
 	});
 
 });
+
+function scrollToBottom() {
+  contentMessages.scrollTop = contentMessages.scrollHeight;
+}
 
 document.querySelector('#preFormChat #dejarChat').addEventListener('click',
 (event) => {
