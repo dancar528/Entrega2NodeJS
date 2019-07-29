@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-console.log('----------------+++++++++++++++');
 const moduloSchema = new Schema({
 	fechaCreacion: {
 		type: Date,
