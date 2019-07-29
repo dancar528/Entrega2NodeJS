@@ -101,3 +101,7 @@
 	border: 1px #9b9e9f solid;
 	padding: 15px;
 }
+
+#preFormChat #dejarChat {
+    display: none;
+}

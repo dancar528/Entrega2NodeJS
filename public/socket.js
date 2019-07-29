@@ -5,13 +5,9 @@ const preForm = document.getElementById('preFormChat');
 const content = document.getElementById('chatContent');
 const contentMessages = document.getElementById('chatContentMessages');
 
-content.style.display = 'none';
-preForm.elements.dejarChat.style.display = 'none';
-
 document.querySelector('#preFormChat #unirChat').addEventListener('click',
 	(event) => {
 	event.preventDefault();
-	content.style.display = 'block';
 	preForm.elements.unirChat.style.display = 'none';
 	preForm.elements.dejarChat.style.display = 'block';
 	const nombre = preForm.elements.nombre.value;
