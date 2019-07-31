@@ -30,7 +30,8 @@ const {
 	obtenerModulosPorCurso,
 	ingresarModulo,
 	obtenerCursosPorAspirante,
-	mostrarNotificaciones
+	mostrarNotificaciones,
+	obtenerCursosPorAspirante
 } = require('./funciones');
 
 var resultado=null;
