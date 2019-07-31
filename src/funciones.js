@@ -1070,9 +1070,6 @@ module.exports = {
 	esAlumnoDelCurso: esAlumnoDelCurso,
 	obtenerModulosPorCurso: obtenerModulosPorCurso,
 	ingresarModulo:ingresarModulo,
-<<<<<<< HEAD
-	mostrarNotificaciones:mostrarNotificaciones
-=======
+	mostrarNotificaciones:mostrarNotificaciones,
 	obtenerCursosPorAspirante: obtenerCursosPorAspirante
->>>>>>> 3912b38fb673dd7509ce8e98296dad770136bcc8
 };
