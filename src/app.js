@@ -29,6 +29,7 @@ const {
 	esAlumnoDelCurso,
 	obtenerModulosPorCurso,
 	ingresarModulo,
+	obtenerCursosPorAspirante,
 	mostrarNotificaciones
 } = require('./funciones');
 
@@ -200,6 +201,7 @@ app.post('/', (req, res) => {
 	    	req.session.rol = resultado.rol;
 			res.locals.sesion = true;
 			res.locals.rol_sesion = resultado.rol;
+			let cursosAspirante = [];
 			if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
 				listacursoestudiante = await mostrarAspirantesXCurso();
 				docentes = await listarDocentes();
@@ -208,6 +210,7 @@ app.post('/', (req, res) => {
 			let notificaciones = []
 			notificaciones = await mostrarNotificaciones(req.body.doc);
 	    	consultarAspirante(req.body.doc, (usuario) => {
+
 			    res.locals.nombre_usuario = usuario.nombre;
 			    res.locals.doc_sesion = usuario.doc;
 				req.session.nombre = usuario.nombre;
@@ -223,7 +226,8 @@ app.post('/', (req, res) => {
 					formulario: req.body,
 					action: 'cursosinscritos',
 					resultlist: listacursoestudiante,
-					docentes: docentes
+					docentes: docentes//,
+					//cursosAspirante: cursosAspirante
 				});
 			});
 	    } else {
@@ -507,6 +511,7 @@ io.sockets.on('connection', client => {
 	let	usuario = null;
 
 	client.on('create', (room, usuarioNuevo) => {
+		console.log('room', room);
 		client.join(room);
 		if (room) {
 			roomSS = room;
@@ -522,8 +527,21 @@ io.sockets.on('connection', client => {
 		io.to(roomSS).emit('nuevoUsuario', txt);
 	});
 
+	client.on('createPush', (room) => {
+		client.join(room);
+	});
+
 	client.on('texto', (texto) => {
 		io.to(roomSS).emit('texto', texto);
+	});
+
+	client.on('nuevoUpload', (data) => {
+	console.log('nuevoUpload app.js');
+
+		//let texto = `Un nuevo archivo se ha subido en el curso ${data.id_curso}`;
+		let texto = `Un nuevo archivo se ha subido en el curso`;
+		//io.to(data.room).emit('textoPush', texto);
+		io.emit('textoPush', texto);
 	});
 
 	client.on('disconnected', () => {
