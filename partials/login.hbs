@@ -7,7 +7,7 @@
 			</div>
 		</div>
 	{{/if}}
-	<form action="/" method="post">
+	<form action="/" method="post" id="formUsuarios">
 		<div class="row">
 			<div class="form-group{{validarCampos resultado formulario 'doc' 'has-danger' 'login'}}">
 				<label for="doc">Usuario</label>
@@ -22,7 +22,7 @@
 		</div>
 		<div class="row">
 			<div class="form-group">
-    			<button class="btn btn-primary" name="boton" value="login">Entrar</button>
+    			<button class="btn btn-primary" name="boton" value="login" id="btnEntrar">Entrar</button>
     		</div>
     		<div class="form-group">
     			<a class="btn btn-link" href="/registro">Registrarme</a>

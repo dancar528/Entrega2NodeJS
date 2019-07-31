@@ -8,6 +8,18 @@ const AspiranteCursoModel = require('./models/aspirantecurso');
 const NotificacionModel = require('./models/notificacion');
 const ModuloModel = require('./models/modulo');
 
+const obtenerCursosPorAspirante = async(doc) => {
+	return new Promise(function(resolve, reject) {
+		AspiranteCursoModel
+			.find({ doc_aspirante: doc })
+			.exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(result);
+		});
+	});
+};
 
 const ingresarModulo = async(modulo) =>{
 	//Realizamos validaciones
@@ -999,5 +1011,6 @@ module.exports = {
 	esDocenteDelCurso: esDocenteDelCurso,
 	esAlumnoDelCurso: esAlumnoDelCurso,
 	obtenerModulosPorCurso: obtenerModulosPorCurso,
-	ingresarModulo:ingresarModulo
+	ingresarModulo:ingresarModulo,
+	obtenerCursosPorAspirante: obtenerCursosPorAspirante
 };
