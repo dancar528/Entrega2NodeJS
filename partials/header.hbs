@@ -104,13 +104,24 @@
 					cualquier lugar del mundo solo con tener un computador a la mano :)</p>
 			</div>
 		</div>
-		{{!-- <div class="buttonNotifications">
-			<button type="button" class="btn btn-secondary circleNotification">
-				<i class="fas fa-bell fa-2x"></i>
-				<div class="badgeNotification">3</div>
-			</button>
-		</div>
-		<div class="notifications js-notifications">
-			<h3>Notifications</h3>
-		</div> --}}
+		{{#if sesion}}
+			{{#ifnoteq rol_sesion ''}}
+				<div class="buttonNotifications">
+					<button type="button" class="btn btn-secondary circleNotification">
+						<i class="fas fa-bell fa-2x"></i>
+						<div class="badgeNotification">3</div>
+					</button>
+				</div>
+				<div class="notifications js-notifications">
+					<h3>Notificaciones</h3>
+					<ul class="listNotificacionClass">
+						{{#each listanot}}
+							<li>
+								{{mensaje}} - {{fechaCreacion}}
+							</li>
+						{{/each}}
+					</ul>
+				</div>
+			{{/ifnoteq}}
+		{{/if}}
 	</header>

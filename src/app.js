@@ -28,7 +28,8 @@ const {
 	esDocenteDelCurso,
 	esAlumnoDelCurso,
 	obtenerModulosPorCurso,
-	ingresarModulo
+	ingresarModulo,
+	mostrarNotificaciones
 } = require('./funciones');
 
 var resultado=null;
@@ -174,6 +175,8 @@ app.post('/subirModulo', upload.single('archivo'),async(req, res) => {
 		}
 	}
 
+
+
 	res.render('curso', {
 		id_curso: req.body.id_curso,
 		resultado: result,
@@ -201,6 +204,9 @@ app.post('/', (req, res) => {
 				listacursoestudiante = await mostrarAspirantesXCurso();
 				docentes = await listarDocentes();
 			}
+
+			let notificaciones = []
+			notificaciones = await mostrarNotificaciones(req.body.doc);
 	    	consultarAspirante(req.body.doc, (usuario) => {
 			    res.locals.nombre_usuario = usuario.nombre;
 			    res.locals.doc_sesion = usuario.doc;
@@ -212,6 +218,7 @@ app.post('/', (req, res) => {
 				localStorage.setItem('token', token);*/
 				res.render('cursos', {
 					rol: resultado.rol,
+					listanot: notificaciones,
 					resultado: resultado,
 					formulario: req.body,
 					action: 'cursosinscritos',
@@ -239,9 +246,15 @@ app.get('/cursos', async (req, res) => {
 		listacursoestudiante = await mostrarAspirantesXCurso();
 		docentes = await listarDocentes();
 	}
+	let notificaciones = [];
+	if(res.locals.doc_sesion){
+		notificaciones = await mostrarNotificaciones(req.session.doc);
+	}
+	
 	res.render('cursos', {
 		rol: res.locals.sesion ? res.locals.rol_sesion : '',
 		resultado: resultado,
+		listanot: notificaciones,
 		formulario: req.query,
 		cursosInscritos: req.query.action,
 		action:req.query.action,
@@ -257,8 +270,13 @@ app.post('/cursos', async (req, res) => {
 		listacursoestudiante = await mostrarAspirantesXCurso();
 		docentes = await listarDocentes();
 	}
+	let notificaciones = [];
+	if(res.locals.doc_sesion){
+		notificaciones = await mostrarNotificaciones(req.session.doc);
+	}
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
+		listanot: notificaciones,
 		formulario: req.body,
 		action:req.query.action,
 		resultlist: listacursoestudiante,
@@ -289,9 +307,13 @@ app.post('/eliminar', async(req, res) => {
 	}
 	
 	req.body.doc = res.locals.doc_sesion;
-	
+	let notificaciones = [];
+	if(res.locals.doc_sesion){
+		notificaciones = await mostrarNotificaciones(req.session.doc);
+	}
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
+		listanot: notificaciones,
 		resultado: result,
 		formulario: req.body,
 		cursosInscritos: req.query.action,
@@ -316,12 +338,18 @@ app.post('/actualizar', async(req, res) => {
 		
 	}
 
+	let notificaciones = [];
+	if(res.locals.doc_sesion){
+		notificaciones = await mostrarNotificaciones(req.session.doc);
+	}
+
 	if(res.locals.rol_sesion=='coordinador' || res.locals.rol_sesion=='docente'){
 		listacursoestudiante = await mostrarAspirantesXCurso();
 		docentes = await listarDocentes();
 	}
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
+		listanot: notificaciones,
 		resultado: resultado,
 		formulario: req.body,
 		action:req.query.action,
@@ -352,9 +380,15 @@ app.post('/crear', async(req, res) => {
 		docentes = await listarDocentes();
 	}
 
+	let notificaciones = [];
+	if(res.locals.doc_sesion){
+		notificaciones = await mostrarNotificaciones(req.session.doc);
+	}
+
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
 		resultado: resultado,
+		listanot: notificaciones,
 		formulario: req.body,
 		action:req.query.action,
 		resultlist: listacursoestudiante,
@@ -384,8 +418,12 @@ app.post('/registro', async (req, res) => {
 });
 
 app.get('/usuarios', (req, res) => {
-
+	let notificaciones = [];
+	if(res.locals.doc_sesion){
+		notificaciones = await mostrarNotificaciones(req.session.doc);
+	}
 	res.render('adminUsuarios', {
+		listanot: notificaciones,
 		rol: res.locals.rol_sesion
 	});
 });
@@ -393,9 +431,13 @@ app.get('/usuarios', (req, res) => {
 app.post('/usuarios', async (req, res) => {
 
 	let resultado = await actualizarUsuario(req.body);
-
+	let notificaciones = [];
+	if(res.locals.doc_sesion){
+		notificaciones = await mostrarNotificaciones(req.session.doc);
+	}
 	res.render('adminUsuarios', {
 		rol: res.locals.rol_sesion,
+		listanot: notificaciones,
 		resultado: resultado,
 		formulario: req.body
 	});
@@ -409,7 +451,10 @@ app.post('/inscribirAspCurso', async(req, res) => {
 	} else if (req.body.boton == 'remover') {
 		resultado = await eliminarAspiranteCurso(req.body.doc_aspirante, req.body.id_curso);
 	}
-
+	let notificaciones = [];
+	if(res.locals.doc_sesion){
+		notificaciones = await mostrarNotificaciones(req.session.doc);
+	}
 	if (req.query.action) {
 		req.body.action = req.query.action;
 	}
@@ -419,6 +464,7 @@ app.post('/inscribirAspCurso', async(req, res) => {
 
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
+		listanot: notificaciones,
 		resultado: resultado,
 		formulario: req.body,
 		action: 'cursos_disponibles',

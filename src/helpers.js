@@ -5,7 +5,8 @@ const {
 	mostrarAspirantesXCursoLista,
 	mostrarUsuarios,
 	listarDocentes,
-	mostrarCursosLista
+	mostrarCursosLista,
+	mostrarNotificaciones
 } = require('./funciones');
 
 const deasync = require('deasync');
@@ -137,4 +138,17 @@ hbs.registerHelper('ifeq', function (a, b, options) {
 hbs.registerHelper('ifnoteq', function (a, b, options) {
     if (a != b) { return options.fn(this); }
     return options.inverse(this);
+});
+
+hbs.registerHelper('mostrarNotificaciones', (doc) => {
+	let resultado;
+	mostrarNotificaciones(doc).then(function(result){
+		resultado = result;
+	});
+
+	while(resultado === undefined) {
+		deasync.runLoopOnce();
+	}
+	//console.log(resultado);
+	return resultado;
 });

@@ -41,6 +41,13 @@ const ingresarModulo = async(modulo) =>{
 		resultado['boton'] = 'subirarchivo';
 		//resultado['camposObligatorios'] = camposObligatorios;
 		resultado['msg'] = 'Se ha subido el módulo correctamente';
+
+		//Añadimos la nueva notificación
+		await crearNotificacionCurso(modulo.id_curso,
+			'Se ha creado subido un nuevo archivo: ' +  modulo.nombre, Date.now());
+		resultado['notificacionMsg'] = 'Se ha creado subido un nuevo archivo: ' +  modulo.nombre;
+		resultado['id_curso'] = modulo.id_curso;
+		resultado['fecha'] = Date.now();
 		return resultado;
 	}else{
 		resultado['estado'] = 'error';
@@ -55,7 +62,7 @@ const subirModulo = async(modulo) => {
 	let nuevoModulo = new ModuloModel({
 		fechaCreacion:Date.now(),
 		ruta:modulo.ruta,
-		nombre:modulo.nombre,
+		mensaje:modulo.nombre,
 		idCurso:modulo.id_curso,
 	});
 
@@ -981,6 +988,57 @@ const mostrarAspirantesXCursoLista = async()=>{
 	return result;
 }
 
+const mostrarNotificaciones = async(doc) =>{
+	//Buscamos los cursos a los que está inscrito el estudiante
+	let cursos =  await listarCursos();
+	let nuevoCursos = [];
+	let aspirantesCursos = await cargarAspirantesCursos();
+	let aspiranteCursos;
+	if(typeof cursos!=='undefined'){
+		aspiranteCursos = aspirantesCursos.filter(
+			aspiranteCurso => aspiranteCurso.doc_aspirante == doc
+		);
+		aspiranteCursos.forEach((aspiranteCurso, indice) => {
+			let curso = cursos.find(
+				curso => curso.id == aspiranteCurso.id_curso
+			);
+			if (typeof curso!=='undefined') {
+				nuevoCursos.push(curso);
+			}
+		});
+	}
+	let notificaciones = [];
+
+	nuevoCursos.forEach(async(curso,indice)=>{
+		let not = [];
+		not = await obtenerNotificacionesPorCurso(curso.id);
+
+		if(typeof not !=='undefined'){
+			not.forEach((n,indice)=>{
+				let data ={
+					nombre:n.nombre,
+					fechaCreacion: n.fechaCreacion,
+					idCurso: n.idCurso
+				};
+				notificaciones.push(data);
+			});
+		}
+
+	});
+	return notificaciones;
+}
+
+const obtenerNotificacionesPorCurso = async(idCurso) => {
+	return new Promise(function(resolve, reject) {
+		NotificacionModel.find({idCurso:idCurso}).exec((error,result)=>{
+			if(error)//return [];
+				throw error;
+
+			resolve(result);
+		});
+	});
+}
+
 module.exports = {
 	mostrarCursos: mostrarCursos,
 	mostrarCursosLista: mostrarCursosLista,
@@ -999,5 +1057,6 @@ module.exports = {
 	esDocenteDelCurso: esDocenteDelCurso,
 	esAlumnoDelCurso: esAlumnoDelCurso,
 	obtenerModulosPorCurso: obtenerModulosPorCurso,
-	ingresarModulo:ingresarModulo
+	ingresarModulo:ingresarModulo,
+	mostrarNotificaciones:mostrarNotificaciones
 };
