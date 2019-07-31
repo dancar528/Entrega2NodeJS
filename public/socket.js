@@ -73,3 +73,18 @@ document.querySelector('#preFormChat #dejarChat').addEventListener('click',
 	});	
 
 });
+
+formUpload = document.getElementById('formUpload');
+
+formUpload.addEventListener('submit', (event) => {
+	console.log('submit');
+	let id_curso = event.target.elements.id_curso.value;
+	window.socketPush.emit('nuevoUpload', {
+		room: `push_${id_curso}`,
+		id_curso: id_curso
+	});
+
+	window.socketPush.on('textoPush', (texto) => {
+		console.log(texto);
+	});
+});
