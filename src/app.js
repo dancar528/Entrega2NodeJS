@@ -29,7 +29,6 @@ const {
 	esAlumnoDelCurso,
 	obtenerModulosPorCurso,
 	ingresarModulo,
-	obtenerCursosPorAspirante,
 	mostrarNotificaciones,
 	obtenerCursosPorAspirante
 } = require('./funciones');
@@ -90,9 +89,15 @@ app.get('/', async(req, res) => {
 			listacursoestudiante = await mostrarAspirantesXCurso();
 			docentes = await listarDocentes();
 		}
+		let notificaciones = [];
+		//console.log(req.session.doc);
+		notificaciones = await mostrarNotificaciones(req.session.doc);
 		res.render('cursos', {
 			rol: res.locals.rol_sesion,
 			resultado: resultado,
+			listanot: notificaciones,
+			numeroNotificaciones: notificaciones.length,
+			nombre_usuario: req.body.nombre_usuario,
 			formulario: formulario,
 			action:'cursos_disponibles',
 			loggeado: (resultado!=null && resultado.estado === 'ok'),
@@ -118,6 +123,9 @@ app.post('/entrarCurso', async(req, res) => {
 		esalumnodocente = await esAlumnoDelCurso(res.locals.doc_sesion,req.body.id_curso);
 	}
 
+	let notificaciones = [];
+	notificaciones = await mostrarNotificaciones(req.session.doc);
+
 	let listamodulos = [];
 
 	if(esalumnodocente!=''){
@@ -134,6 +142,49 @@ app.post('/entrarCurso', async(req, res) => {
 	res.render('curso', {
 		id_curso: req.body.id_curso,
 		resultado: [],
+		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
+		nombre_usuario: req.body.nombre_usuario,
+		nombre_curso: req.body.nombre_curso,
+		doc: res.locals.doc_sesion,
+		docentedelcurso: esdocentedelcurso,
+		esalumnodocente:esalumnodocente,
+		modulos: listamodulos
+	});
+});
+
+app.post('/cargarModulos', async(req, res) => {
+
+	let esdocentedelcurso = await esDocenteDelCurso(res.locals.doc_sesion,req.body.id_curso);
+
+	let esalumnodocente = '';
+	if(esdocentedelcurso!=''){
+		esalumnodocente = 'esalumnodocente';
+	}else{
+		esalumnodocente = await esAlumnoDelCurso(res.locals.doc_sesion,req.body.id_curso);
+	}
+
+	let notificaciones = [];
+	notificaciones = await mostrarNotificaciones(req.session.doc);
+
+	let listamodulos = [];
+
+	if(esalumnodocente!=''){
+		listamodulos = await obtenerModulosPorCurso(req.body.id_curso);
+		if(typeof listamodulos!=='undefined'){
+			listamodulos.forEach(element => {
+				element.ruta = Buffer.from(element.ruta.toString()).toString('base64');
+			});
+		}else{
+			listamodulos = [];
+		}
+	}
+
+	res.render('subirModulo', {
+		id_curso: req.body.id_curso,
+		resultado: [],
+		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		nombre_usuario: req.body.nombre_usuario,
 		nombre_curso: req.body.nombre_curso,
 		doc: res.locals.doc_sesion,
@@ -177,11 +228,14 @@ app.post('/subirModulo', upload.single('archivo'),async(req, res) => {
 		}
 	}
 
+	let notificaciones = [];
+	notificaciones = await mostrarNotificaciones(res.locals.doc_sesion);
 
-
-	res.render('curso', {
+	res.render('subirModulog', {
 		id_curso: req.body.id_curso,
 		resultado: result,
+		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		nombre_usuario: req.body.nombre_usuario,
 		nombre_curso: req.body.nombre_curso,
 		doc: res.locals.doc_sesion,
@@ -208,8 +262,9 @@ app.post('/', (req, res) => {
 				docentes = await listarDocentes();
 			}
 
-			let notificaciones = []
+			let notificaciones = [];
 			notificaciones = await mostrarNotificaciones(req.body.doc);
+			
 	    	consultarAspirante(req.body.doc, (usuario) => {
 
 			    res.locals.nombre_usuario = usuario.nombre;
@@ -220,9 +275,11 @@ app.post('/', (req, res) => {
 						data: resultado.rol,
 					}, 'tdea-virtual', { expiresIn: '1h'});
 				localStorage.setItem('token', token);*/
+				console.log(notificaciones);
 				res.render('cursos', {
 					rol: resultado.rol,
 					listanot: notificaciones,
+					numeroNotificaciones: notificaciones.length,
 					resultado: resultado,
 					formulario: req.body,
 					action: 'cursosinscritos',
@@ -260,6 +317,7 @@ app.get('/cursos', async (req, res) => {
 		rol: res.locals.sesion ? res.locals.rol_sesion : '',
 		resultado: resultado,
 		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		formulario: req.query,
 		cursosInscritos: req.query.action,
 		action:req.query.action,
@@ -282,6 +340,7 @@ app.post('/cursos', async (req, res) => {
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
 		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		formulario: req.body,
 		action:req.query.action,
 		resultlist: listacursoestudiante,
@@ -319,6 +378,7 @@ app.post('/eliminar', async(req, res) => {
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
 		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		resultado: result,
 		formulario: req.body,
 		cursosInscritos: req.query.action,
@@ -355,6 +415,7 @@ app.post('/actualizar', async(req, res) => {
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
 		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		resultado: resultado,
 		formulario: req.body,
 		action:req.query.action,
@@ -394,6 +455,7 @@ app.post('/crear', async(req, res) => {
 		rol: res.locals.rol_sesion,
 		resultado: resultado,
 		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		formulario: req.body,
 		action:req.query.action,
 		resultlist: listacursoestudiante,
@@ -422,13 +484,14 @@ app.post('/registro', async (req, res) => {
 	res.render('formCrearUsuario', parametros);
 });
 
-app.get('/usuarios', (req, res) => {
+app.get('/usuarios', async(req, res) => {
 	let notificaciones = [];
 	if(res.locals.doc_sesion){
 		notificaciones = await mostrarNotificaciones(req.session.doc);
 	}
 	res.render('adminUsuarios', {
 		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		rol: res.locals.rol_sesion
 	});
 });
@@ -443,6 +506,7 @@ app.post('/usuarios', async (req, res) => {
 	res.render('adminUsuarios', {
 		rol: res.locals.rol_sesion,
 		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		resultado: resultado,
 		formulario: req.body
 	});
@@ -470,6 +534,7 @@ app.post('/inscribirAspCurso', async(req, res) => {
 	res.render('cursos', {
 		rol: res.locals.rol_sesion,
 		listanot: notificaciones,
+		numeroNotificaciones: notificaciones.length,
 		resultado: resultado,
 		formulario: req.body,
 		action: 'cursos_disponibles',
@@ -505,6 +570,8 @@ app.get('/salir', (req, res) => {
 	});
 	
 });
+
+var users = [];
 
 io.sockets.on('connection', client => {
 	console.log('un usuario se ha conectado');
@@ -552,6 +619,20 @@ io.sockets.on('connection', client => {
 
 		client.disconnect();
 	});
+
+	client.on('setIdCurso', (idCurso) => {
+		console.log('Curso push ' + idCurso);
+		client.join(idCurso);
+			//console.log(users);
+	});
+
+	client.on('notification', (data) => {
+		let idCurso = data.idCurso;
+		let mensaje = data.mensaje;
+		//console.log(data);
+		io.to(idCurso).emit('notificacion',mensaje);
+	});
+
 });
 
 /*app.listen(process.env.PORT, () =>

@@ -109,15 +109,15 @@
 				<div class="buttonNotifications">
 					<button type="button" class="btn btn-secondary circleNotification">
 						<i class="fas fa-bell fa-2x"></i>
-						<div class="badgeNotification">3</div>
+						<div id="numNotification" class="badgeNotification">{{numeroNotificaciones}}</div>
 					</button>
 				</div>
-				<div class="notifications js-notifications">
+				<div id="ventanaNotificacion" class="notifications js-notifications">
 					<h3>Notificaciones</h3>
-					<ul class="listNotificacionClass">
+					<ul id="listNotification" class="listNotificacionClass" style="width: 300px;overflow: auto;height: 310px;">
 						{{#each listanot}}
 							<li>
-								{{mensaje}} - {{fechaCreacion}}
+								{{nombre}}
 							</li>
 						{{/each}}
 					</ul>

@@ -88,3 +88,19 @@ formUpload.addEventListener('submit', (event) => {
 		console.log(texto);
 	});
 });
+
+// window.socketPush.on('notification', (mensaje) => {
+// 	console.log(mensaje);
+// 	notifyMe(mensaje);
+// 	$("#listNotification").append(mensaje);
+// });
+
+document.addEventListener('DOMContentLoaded', function() {
+	if (!Notification) {
+		alert('Desktop notifications not available in your browser. Try Chromium.');
+		return;
+	}
+
+	if (Notification.permission !== 'granted')
+		Notification.requestPermission();
+});

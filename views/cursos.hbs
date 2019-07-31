@@ -1,4 +1,7 @@
 {{>header}}
+<script>
+	var listaIdCursos = [];
+</script>
 {{#if (alertaValidarCampos resultado.boton 'remover')}}
 	<div class="row">
 		<div class="bs-component" align="center" style="margin-left: 150px">
@@ -58,6 +61,9 @@
 					</thead>
 					<tbody>
 						<tr>
+							<script>
+								listaIdCursos.push("{{{id}}}");
+							</script>
 							{{#ifeq ../rol_sesion 'coordinador'}}
 								<td scope="col">{{estado}}</td>
 								<td scope="col">{{id}}</td>
@@ -105,6 +111,14 @@
 								<input type="hidden" name="nombre_curso" value="{{nombre}}" >
 								<button class="btn btn-primary" name="boton" value="entrarCurso" style="margin-bottom: 15px;">Entrar al curso</button>
 		        			</form>
+							{{#ifeq ../rol_sesion 'docente'}}
+								<form action="/cargarModulos" method="post">
+									<input type="hidden" name="id_curso" value="{{id}}" >
+									<input type="hidden" name="nombre_usuario" value="{{../nombre_usuario}}" >
+									<input type="hidden" name="nombre_curso" value="{{nombre}}" >
+									<button class="btn btn-primary" name="boton" value="cargarModulo" style="margin-bottom: 15px;">Cargar Módulos</button>
+								</form>
+							{{/ifeq}}
 		        		{{/ifeq}}
 			        {{/if}}
 				{{/ifnoteq}}
@@ -122,3 +136,15 @@
 	</div>
 </div>
 {{>footer}}
+<!-- Agregamos los cursos al socket -->
+<script>
+
+	var socket = io.connect();
+
+	socket.on('connect', function (data) {
+		for(var i =0;i<listaIdCursos.length;i++){
+			socket.emit('setIdCurso', listaIdCursos[i]);
+		}
+	});
+
+</script>

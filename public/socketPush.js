@@ -20,6 +20,36 @@ console.log('daniela');
 				socketPush.emit('createPush', 'sdsdfsd');//`push_${idCursoNotPush}`);
 			});
 		});
+
 	}
+
+	//Generamos un evento onclick para el botón de las notificaciones
+	$(".buttonNotifications").on('click',function(){
+
+		if($('#ventanaNotificacion').is(':visible')){
+			$('#ventanaNotificacion').hide();
+		}else{
+			$('#ventanaNotificacion').show();
+		}
+
+	});
+	socket = io.connect();
+	socket.on('notificacion', (mensaje) => {
+		console.log(mensaje);
+		notifyMe(mensaje);
+		var number = Number($("#numNotification").html()) + 1;
+		$("#listNotification").append(mensaje);
+		$("#numNotification").html(number);
+	});
 });
+
+function notifyMe(mensaje) {
+	if (Notification.permission !== 'granted')
+	 Notification.requestPermission();
+	else {
+	 var notification = new Notification('Notificacion', {
+	  body: mensaje,
+	 });
+	}
+   }
 

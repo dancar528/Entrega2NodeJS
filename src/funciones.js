@@ -74,14 +74,14 @@ const subirModulo = async(modulo) => {
 	let nuevoModulo = new ModuloModel({
 		fechaCreacion:Date.now(),
 		ruta:modulo.ruta,
-		mensaje:modulo.nombre,
+		nombre:modulo.nombre,
 		idCurso:modulo.id_curso,
 	});
 
 	return new Promise(function(resolve, reject) {
 		nuevoModulo.save((error,result)=>{
 			if(error)//return false;
-				resolve(false);
+				throw error;
 			
 			resolve(true);
 		});
@@ -516,7 +516,7 @@ const actualizarEstadoCurso = async(idCurso, nuevoEstado, docente) => {
 const crearNotificacionCurso = async (idCurso, mensaje, fechaNotificacion) => {
 	let nuevaNotificacion = new NotificacionModel({
 		idCurso: idCurso,
-		mensaje: mensaje,
+		nombre: mensaje,
 		fechaCreacion: fechaNotificacion
 	});
 	nuevaNotificacion.save((err, resultado) => {

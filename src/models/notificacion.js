@@ -5,7 +5,7 @@ const notificacionSchema = new Schema({
 		type: Date,
 		required: true
 	},
-	mensaje: {
+	nombre: {
 		type: String,
 		required: true
 	},
